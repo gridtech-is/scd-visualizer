@@ -125,7 +125,7 @@ export default function TopBar({
   return (
     <header className="topbar-v2">
       <div className="topbar-left">
-        <span className="topbar-logo">◆ SCD Visualizer V2</span>
+        <span className="topbar-logo">◆ SCD Visualizer</span>
       </div>
 
       <div className="topbar-center">

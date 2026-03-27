@@ -1,0 +1,55 @@
+name: Feature request
+description: Suggest a new feature or improvement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for a new feature or improvement? We'd love to hear it!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem does this feature solve, or what would it improve?
+      placeholder: e.g. "It's hard to find which IEDs are missing SV subscriptions without scrolling through the whole list."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature you'd like to see
+      placeholder: e.g. "Add a filter in the Validation view to show only IEDs with a specific check failing."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered any alternative approaches or workarounds?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the app does this relate to?
+      options:
+        - Dashboard
+        - Graph / Visualizer
+        - Validation
+        - Network view
+        - Statistics
+        - Addresses
+        - IED Explorer
+        - Single Line Diagram
+        - Compare / Diff
+        - Export
+        - Python CLI
+        - Other
+    validations:
+      required: false

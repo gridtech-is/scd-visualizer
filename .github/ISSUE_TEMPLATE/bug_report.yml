@@ -1,0 +1,64 @@
+name: Bug report
+description: Something is not working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in as much detail as possible.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A short description of the bug
+      placeholder: e.g. "Validation matrix is blank after loading a .cid file"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce the issue?
+      placeholder: |
+        1. Open the app at https://gridtech-is.github.io/scd-visualizer/
+        2. Load a file
+        3. Click on ...
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What actually happened? Include any error messages or screenshots.
+    validations:
+      required: true
+
+  - type: input
+    id: file_type
+    attributes:
+      label: File type
+      description: Which SCL file type were you using?
+      placeholder: e.g. .scd, .cid, .icd
+    validations:
+      required: false
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Which browser and version?
+      placeholder: e.g. Chrome 124, Firefox 126, Safari 17
+    validations:
+      required: false

@@ -1,7 +1,7 @@
 {
-  "name": "scd-visualizer-v2",
-  "private": true,
+  "name": "scd-visualizer",
   "version": "0.1.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",

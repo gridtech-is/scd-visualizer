@@ -166,7 +166,7 @@ export default function StartupScreen({
       </svg>
 
       <div className="startup-screen-inner">
-        <div className="startup-logo">◆ SCD Visualizer V2</div>
+        <div className="startup-logo">◆ SCD Visualizer</div>
         <p className="startup-subtitle">IEC 61850 SCL/SCD file viewer and validator</p>
 
         <div className="startup-cards">
