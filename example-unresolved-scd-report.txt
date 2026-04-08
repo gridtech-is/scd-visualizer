@@ -1,0 +1,39 @@
+IEC 61850 SCD REPORT
+
+Generated: 2026-02-23T14:24:33.506Z
+Source: /Users/teddi/Documents/New project/public/examples/example-unresolved.scd
+Last modified: 2026-02-13T11:55:49.554Z
+File size: 1.3 KB (1340 bytes)
+
+OVERVIEW
+- IED: 2
+- AccessPoint: 2
+- LDevice: 2
+- DataSet: 1
+- FCDA: 1
+- ExtRef: 1
+
+CONTROL BLOCKS
+- GSEControl: 1
+- SampledValueControl: 0
+- ReportControl: 0
+
+COMMUNICATION
+- SubNetwork: 1
+- ConnectedAP: 2
+- GSE endpoints: 1
+- SMV endpoints: 0
+
+QUALITY CHECKS
+- GSEControl without matching ConnectedAP (same IED/AP): 0
+- SampledValueControl without matching ConnectedAP (same IED/AP): 0
+- ReportControl missing datSet: 0
+- Unnamed IED entries: 0
+- Unnamed SubNetwork entries: 0
+
+IED LIST (up to first 15)
+- PUB_X
+- SUB_Y
+
+SUBNETWORK LIST
+- ProcessBus (type: 8-MMS, ConnectedAP: 2)

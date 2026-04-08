@@ -1,0 +1,23 @@
+{
+  "_comment": "Landsnet IEC 61850 validation thresholds. Edit to match site-specific requirements.",
+  "goose_protection": {
+    "_comment": "Applied when GSEControl name contains 'P'",
+    "appid_prefix": "80",
+    "vlan_priority": 7,
+    "min_time": 4,
+    "max_time": 2000
+  },
+  "goose_standard": {
+    "_comment": "Applied when GSEControl name does NOT contain 'P'",
+    "appid_prefix": "00",
+    "vlan_priority": 4,
+    "min_time": 10,
+    "max_time": 10000
+  },
+  "sv": {
+    "_comment": "Applied to SampledValueControl blocks",
+    "appid_prefix": "40",
+    "vlan_priority_protection": 7,
+    "vlan_priority_metered": 4
+  }
+}

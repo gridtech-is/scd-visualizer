@@ -35,6 +35,7 @@ import { useCompareState, type ChangeFilters } from './state/useCompareState';
 import { buildDiffReport } from './diff/report';
 import StartupScreen from './components/StartupScreen';
 import DashboardWorkspace from './components/DashboardWorkspace';
+import AiCreateWorkspace from './components/AiCreateWorkspace';
 
 export type AppMode =
   | 'dashboard'
@@ -46,7 +47,8 @@ export type AppMode =
   | 'addresses'
   | 'ied'
   | 'version'
-  | 'sld';
+  | 'sld'
+  | 'ai-create';
 
 export default function App(): JSX.Element {
   return (
@@ -476,6 +478,7 @@ function AppInner(): JSX.Element {
   }
 
   const centerViewItems: Array<{ id: typeof appMode; label: string; icon: string }> = [
+    { id: 'ai-create', label: 'AI Create', icon: '✦' },
     { id: 'dashboard', label: 'Dashboard', icon: '◈' },
     { id: 'visualizer', label: 'Graph', icon: '⬡' },
     { id: 'issues', label: 'Validation', icon: '✓' },
@@ -643,11 +646,25 @@ function AppInner(): JSX.Element {
         }}
       />
 
-      {!model && !error ? (
+      {appMode === 'ai-create' ? (
+        <div className="app-main">
+          <AiCreateWorkspace
+            onLoadScd={(xml, fileName) => {
+              const result = parseSclDocument(xml);
+              applyParsedMain(result, fileName);
+              if (result.model) {
+                setPendingLastSession({ fileName, ieds: result.model.ieds.length, ts: Date.now() });
+                setAppMode('dashboard');
+              }
+            }}
+          />
+        </div>
+      ) : !model && !error ? (
         <StartupScreen
           onLoadFile={() => fileInputRef.current?.click()}
           onLoadCompare={() => startupCompareInputRef.current?.click()}
           onLoadExample={(path) => void loadExample(path)}
+          onAiCreate={() => setAppMode('ai-create')}
           onDropFile={(file) => {
             readFile(file, (result, name) => {
               applyParsedMain(result, name);

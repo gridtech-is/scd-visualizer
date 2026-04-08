@@ -1,0 +1,114 @@
+%PDF-1.4
+%ÿÿÿÿ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 1 /Kids [3 0 R] >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 1140 >>
+stream
+BT
+/F1 10 Tf
+14 TL
+72 720 Td
+(IEC 61850 SCD REPORT) Tj
+T*
+() Tj
+T*
+(Generated: 2026-02-23T14:24:21.232Z) Tj
+T*
+(Source: /Users/teddi/Documents/New project/public/examples/example-basic.scd) Tj
+T*
+(Last modified: 2026-02-13T11:55:44.924Z) Tj
+T*
+(File size: 2.6 KB \(2663 bytes\)) Tj
+T*
+() Tj
+T*
+(OVERVIEW) Tj
+T*
+(- IED: 2) Tj
+T*
+(- AccessPoint: 2) Tj
+T*
+(- LDevice: 2) Tj
+T*
+(- DataSet: 2) Tj
+T*
+(- FCDA: 2) Tj
+T*
+(- ExtRef: 2) Tj
+T*
+() Tj
+T*
+(CONTROL BLOCKS) Tj
+T*
+(- GSEControl: 1) Tj
+T*
+(- SampledValueControl: 0) Tj
+T*
+(- ReportControl: 1) Tj
+T*
+() Tj
+T*
+(COMMUNICATION) Tj
+T*
+(- SubNetwork: 1) Tj
+T*
+(- ConnectedAP: 2) Tj
+T*
+(- GSE endpoints: 1) Tj
+T*
+(- SMV endpoints: 1) Tj
+T*
+() Tj
+T*
+(QUALITY CHECKS) Tj
+T*
+(- GSEControl without matching ConnectedAP \(same IED/AP\): 0) Tj
+T*
+(- SampledValueControl without matching ConnectedAP \(same IED/AP\): 0) Tj
+T*
+(- ReportControl missing datSet: 0) Tj
+T*
+(- Unnamed IED entries: 0) Tj
+T*
+(- Unnamed SubNetwork entries: 0) Tj
+T*
+() Tj
+T*
+(IED LIST \(up to first 15\)) Tj
+T*
+(- PUB_A) Tj
+T*
+(- SUB_B) Tj
+T*
+() Tj
+T*
+(SUBNETWORK LIST) Tj
+T*
+(- StationBus \(type: 8-MMS, ConnectedAP: 2\)) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000019 00000 n 
+0000000068 00000 n 
+0000000125 00000 n 
+0000000251 00000 n 
+0000001442 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1510
+%%EOF

@@ -8,6 +8,7 @@ export interface StartupScreenProps {
   onLoadExample: (path: string) => void;
   onDropFile: (file: File) => void;
   lastSession?: LastSession;
+  onAiCreate?: () => void;
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -35,6 +36,7 @@ export default function StartupScreen({
   onLoadExample,
   onDropFile,
   lastSession,
+  onAiCreate,
 }: StartupScreenProps): JSX.Element {
   const [isDragging, setIsDragging] = useState(false);
   const [recentSession, setRecentSession] = useState<LastSession | null>(null);
@@ -170,6 +172,14 @@ export default function StartupScreen({
         <p className="startup-subtitle">IEC 61850 SCL/SCD file viewer and validator</p>
 
         <div className="startup-cards">
+          {onAiCreate && (
+            <button className="startup-card startup-card-ai" onClick={onAiCreate} type="button">
+              <span className="startup-card-icon">✦</span>
+              <span className="startup-card-title">AI Create SCD</span>
+              <span className="startup-card-desc">Lýstu substation-inu þínu og AI myndar SCD skrá fyrir þig</span>
+              <span className="startup-card-badge">NEW</span>
+            </button>
+          )}
           <button className="startup-card" onClick={onLoadFile} type="button">
             <span className="startup-card-icon">⬡</span>
             <span className="startup-card-title">Open SCD file</span>

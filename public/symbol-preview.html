@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>IEC 60617 Symbol Preview</title>
+<style>
+  body { background: #0f172a; color: #e2e8f0; font-family: monospace; padding: 20px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 30px; }
+  .symbol-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; text-align: center; width: 140px; }
+  .symbol-card h3 { font-size: 11px; color: #94a3b8; margin: 8px 0 2px; }
+  .symbol-card p { font-size: 10px; color: #64748b; margin: 0; }
+  svg { overflow: visible; }
+  h1 { color: #38bdf8; margin-bottom: 24px; }
+  .section { margin-bottom: 32px; }
+  .section-title { color: #a78bfa; font-size: 14px; margin-bottom: 16px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
+</style>
+</head>
+<body>
+<h1>IEC 60617 — SLD Tákn / Symbols</h1>
+
+<div class="section">
+<div class="section-title">Leiðarkerfi / Conductors & Busbars</div>
+<div class="grid">
+
+<!-- BUSBAR -->
+<div class="symbol-card">
+  <svg width="100" height="60" viewBox="0 0 100 60">
+    <!-- Busbar A -->
+    <line x1="5" y1="20" x2="95" y2="20" stroke="#4ade80" stroke-width="4"/>
+    <text x="2" y="15" fill="#4ade80" font-size="9">A</text>
+    <!-- Busbar B -->
+    <line x1="5" y1="40" x2="95" y2="40" stroke="#4ade80" stroke-width="4"/>
+    <text x="2" y="35" fill="#4ade80" font-size="9">B</text>
+  </svg>
+  <h3>BUSBAR</h3>
+  <p>220 kV A/B</p>
+</div>
+
+<!-- CONDUCTOR / FEEDER LINE -->
+<div class="symbol-card">
+  <svg width="60" height="80" viewBox="0 0 60 80">
+    <line x1="30" y1="0" x2="30" y2="80" stroke="#e2e8f0" stroke-width="2"/>
+  </svg>
+  <h3>CONDUCTOR</h3>
+  <p>lína</p>
+</div>
+
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">Rofar / Switching Devices</div>
+<div class="grid">
+
+<!-- CIRCUIT BREAKER (CBR) - like DIS but with star at fixed contact end -->
+<div class="symbol-card">
+  <svg width="60" height="100" viewBox="0 0 60 100">
+    <!-- Line in -->
+    <line x1="30" y1="0" x2="30" y2="35" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Pivot dot (hinge) -->
+    <circle cx="30" cy="36" r="3" fill="#e2e8f0"/>
+    <!-- Blade - diagonal (same angle as DIS) -->
+    <line x1="30" y1="36" x2="30" y2="58" stroke="#e2e8f0" stroke-width="2" transform="rotate(-30 30 36)"/>
+    <!-- Star ✱ at fixed contact end (tip of blade) — 6-point star -->
+    <g transform="translate(21,62)">
+      <line x1="0" y1="-5" x2="0" y2="5" stroke="#e2e8f0" stroke-width="1.8"/>
+      <line x1="-4.3" y1="-2.5" x2="4.3" y2="2.5" stroke="#e2e8f0" stroke-width="1.8"/>
+      <line x1="4.3" y1="-2.5" x2="-4.3" y2="2.5" stroke="#e2e8f0" stroke-width="1.8"/>
+    </g>
+    <!-- Line out -->
+    <line x1="30" y1="68" x2="30" y2="100" stroke="#e2e8f0" stroke-width="2"/>
+  </svg>
+  <h3>CBR — GS100</h3>
+  <p>Circuit Breaker / Aflrofi</p>
+</div>
+
+<!-- DISCONNECTOR (DIS) - blade only, NO circle at lower end -->
+<div class="symbol-card">
+  <svg width="60" height="100" viewBox="0 0 60 100">
+    <!-- Line in -->
+    <line x1="30" y1="0" x2="30" y2="35" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Pivot dot (hinge) only at top -->
+    <circle cx="30" cy="36" r="3" fill="#e2e8f0"/>
+    <!-- Blade - diagonal line -->
+    <line x1="30" y1="36" x2="30" y2="58" stroke="#e2e8f0" stroke-width="2" transform="rotate(-30 30 36)"/>
+    <!-- Line out - NO circle, just line -->
+    <line x1="30" y1="65" x2="30" y2="100" stroke="#e2e8f0" stroke-width="2"/>
+  </svg>
+  <h3>DIS — GS210/220</h3>
+  <p>Disconnector / Aðskilnungsrofi</p>
+</div>
+
+<!-- EARTH SWITCH (GG) - like DIS but blade swings to ground symbol -->
+<div class="symbol-card">
+  <svg width="60" height="100" viewBox="0 0 60 100">
+    <!-- Line in -->
+    <line x1="30" y1="0" x2="30" y2="30" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Pivot dot (hinge) - same as DIS -->
+    <circle cx="30" cy="31" r="3" fill="#e2e8f0"/>
+    <!-- Blade swinging toward ground (angled ~45°) - no circle at tip -->
+    <line x1="30" y1="31" x2="30" y2="53" stroke="#e2e8f0" stroke-width="2" transform="rotate(-45 30 31)"/>
+    <!-- Ground symbol below (target of blade) -->
+    <line x1="10" y1="65" x2="50" y2="65" stroke="#e2e8f0" stroke-width="2.5"/>
+    <line x1="16" y1="72" x2="44" y2="72" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="22" y1="79" x2="38" y2="79" stroke="#e2e8f0" stroke-width="1.5"/>
+  </svg>
+  <h3>GG010/020</h3>
+  <p>Earth Switch / Jarðtengingarrofi</p>
+</div>
+
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">Mælitæki / Instrument Transformers</div>
+<div class="grid">
+
+<!-- CURRENT TRANSFORMER (CTR) - circle around conductor -->
+<div class="symbol-card">
+  <svg width="60" height="100" viewBox="0 0 60 100">
+    <!-- Line in -->
+    <line x1="30" y1="0" x2="30" y2="38" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- CT circle (main winding) -->
+    <circle cx="30" cy="50" r="14" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- secondary winding symbol (small circle below) -->
+    <circle cx="30" cy="68" r="8" fill="none" stroke="#e2e8f0" stroke-width="1.5"/>
+    <!-- Line continues through center -->
+    <line x1="30" y1="64" x2="30" y2="100" stroke="#e2e8f0" stroke-width="2"/>
+  </svg>
+  <h3>CTR — CE900_CT</h3>
+  <p>Current Transformer / Straumsmælir</p>
+</div>
+
+<!-- VOLTAGE TRANSFORMER (VTR) - two circles side by side -->
+<div class="symbol-card">
+  <svg width="80" height="100" viewBox="0 0 80 100">
+    <!-- Line from busbar -->
+    <line x1="40" y1="0" x2="40" y2="30" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Branch down -->
+    <line x1="40" y1="30" x2="40" y2="42" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Primary winding circle -->
+    <circle cx="40" cy="54" r="12" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Secondary winding circle (overlapping) -->
+    <circle cx="40" cy="72" r="12" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Ground on secondary -->
+    <line x1="40" y1="84" x2="40" y2="92" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="25" y1="92" x2="55" y2="92" stroke="#e2e8f0" stroke-width="2.5"/>
+    <line x1="30" y1="97" x2="50" y2="97" stroke="#e2e8f0" stroke-width="1.5"/>
+  </svg>
+  <h3>VTR — CE200/CE900</h3>
+  <p>Voltage Transformer / Spennumælir</p>
+</div>
+
+<!-- 3-WINDING TRANSFORMER (SP1) -->
+<div class="symbol-card">
+  <svg width="80" height="120" viewBox="0 0 80 120">
+    <!-- 220kV line in -->
+    <line x1="40" y1="0" x2="40" y2="18" stroke="#4ade80" stroke-width="2"/>
+    <!-- Primary 220kV winding -->
+    <circle cx="40" cy="30" r="12" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+    <!-- 132kV winding -->
+    <circle cx="40" cy="60" r="12" fill="none" stroke="#f87171" stroke-width="2.5"/>
+    <!-- 11kV winding -->
+    <circle cx="40" cy="90" r="12" fill="none" stroke="#fbbf24" stroke-width="2.5"/>
+    <!-- Connection lines between windings -->
+    <line x1="40" y1="42" x2="40" y2="48" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2"/>
+    <line x1="40" y1="72" x2="40" y2="78" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2,2"/>
+    <!-- 132kV line out -->
+    <line x1="40" y1="102" x2="40" y2="120" stroke="#f87171" stroke-width="2"/>
+  </svg>
+  <h3>SP1 — 220/132/11kV</h3>
+  <p>3-Wind. Transformer</p>
+</div>
+
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">Verndar tæki / Protection</div>
+<div class="grid">
+
+<!-- SURGE ARRESTER (GV) -->
+<div class="symbol-card">
+  <svg width="60" height="100" viewBox="0 0 60 100">
+    <!-- Line from bus -->
+    <line x1="30" y1="0" x2="30" y2="30" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Arrester body (filled arrow pointing down) -->
+    <polygon points="30,30 18,55 42,55" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Bottom of arrester -->
+    <line x1="18" y1="60" x2="42" y2="60" stroke="#e2e8f0" stroke-width="2.5"/>
+    <!-- Ground -->
+    <line x1="30" y1="60" x2="30" y2="70" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="15" y1="70" x2="45" y2="70" stroke="#e2e8f0" stroke-width="2.5"/>
+    <line x1="20" y1="77" x2="40" y2="77" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="25" y1="84" x2="35" y2="84" stroke="#e2e8f0" stroke-width="1.5"/>
+  </svg>
+  <h3>GV — Surge Arrester</h3>
+  <p>Yfirspennuvari</p>
+</div>
+
+<!-- LINE END / IFL -->
+<div class="symbol-card">
+  <svg width="60" height="100" viewBox="0 0 60 100">
+    <!-- Line -->
+    <line x1="30" y1="0" x2="30" y2="60" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- Arrow pointing right (line continues to external substation) -->
+    <line x1="30" y1="60" x2="30" y2="85" stroke="#e2e8f0" stroke-width="2"/>
+    <polygon points="30,100 20,80 40,80" fill="#e2e8f0"/>
+    <!-- Label area -->
+  </svg>
+  <h3>IFL — Line End</h3>
+  <p>Línuendi / Infeeder</p>
+</div>
+
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">Dæmi um heilt bay / Complete bay example (132kV feeder)</div>
+<div class="grid" style="align-items:flex-start">
+<div class="symbol-card" style="width:200px">
+  <svg width="160" height="480" viewBox="0 0 160 480">
+    <!-- ===== BUSBAR A ===== -->
+    <line x1="0" y1="20" x2="160" y2="20" stroke="#f87171" stroke-width="5"/>
+    <text x="2" y="15" fill="#f87171" font-size="9" font-weight="bold">132 kV A</text>
+
+    <!-- Bus disconnector top (GS310) - no circle at lower end -->
+    <line x1="80" y1="20" x2="80" y2="45" stroke="#e2e8f0" stroke-width="2"/>
+    <circle cx="80" cy="46" r="3" fill="#e2e8f0"/>
+    <line x1="80" y1="46" x2="80" y2="66" stroke="#e2e8f0" stroke-width="2" transform="rotate(-30 80 46)"/>
+    <line x1="80" y1="70" x2="80" y2="95" stroke="#e2e8f0" stroke-width="2"/>
+    <text x="90" y="58" fill="#94a3b8" font-size="8">GS310</text>
+
+    <!-- Bus coupler disconnector (GS270) - no circle at lower end -->
+    <circle cx="80" cy="96" r="3" fill="#e2e8f0"/>
+    <line x1="80" y1="96" x2="80" y2="116" stroke="#e2e8f0" stroke-width="2" transform="rotate(-30 80 96)"/>
+    <line x1="80" y1="120" x2="80" y2="145" stroke="#e2e8f0" stroke-width="2"/>
+    <text x="90" y="108" fill="#94a3b8" font-size="8">GS270</text>
+
+    <!-- CBR GS100 - blade with star at fixed end -->
+    <circle cx="80" cy="146" r="3" fill="#e2e8f0"/>
+    <line x1="80" y1="146" x2="80" y2="166" stroke="#e2e8f0" stroke-width="2" transform="rotate(-30 80 146)"/>
+    <!-- Star at fixed contact -->
+    <g transform="translate(71,170)">
+      <line x1="0" y1="-5" x2="0" y2="5" stroke="#e2e8f0" stroke-width="1.8"/>
+      <line x1="-4.3" y1="-2.5" x2="4.3" y2="2.5" stroke="#e2e8f0" stroke-width="1.8"/>
+      <line x1="4.3" y1="-2.5" x2="-4.3" y2="2.5" stroke="#e2e8f0" stroke-width="1.8"/>
+    </g>
+    <line x1="80" y1="175" x2="80" y2="195" stroke="#e2e8f0" stroke-width="2"/>
+    <text x="90" y="162" fill="#94a3b8" font-size="8">GS100</text>
+
+    <!-- DIS lower (GS210) - no circle at lower end -->
+    <circle cx="80" cy="196" r="3" fill="#e2e8f0"/>
+    <line x1="80" y1="196" x2="80" y2="216" stroke="#e2e8f0" stroke-width="2" transform="rotate(-30 80 196)"/>
+    <line x1="80" y1="220" x2="80" y2="245" stroke="#e2e8f0" stroke-width="2"/>
+    <text x="90" y="210" fill="#94a3b8" font-size="8">GS210</text>
+
+    <!-- CT circle -->
+    <circle cx="80" cy="255" r="13" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+    <circle cx="80" cy="272" r="8" fill="none" stroke="#e2e8f0" stroke-width="1.5"/>
+    <line x1="80" y1="240" x2="80" y2="242" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="80" y1="280" x2="80" y2="310" stroke="#e2e8f0" stroke-width="2"/>
+    <text x="96" y="258" fill="#94a3b8" font-size="8">CE900_CT</text>
+
+    <!-- Earth switch (GG010) -->
+    <line x1="80" y1="310" x2="80" y2="330" stroke="#e2e8f0" stroke-width="2"/>
+    <circle cx="80" cy="331" r="3" fill="#e2e8f0"/>
+    <line x1="80" y1="331" x2="50" y2="351" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="35" y1="360" x2="55" y2="360" stroke="#e2e8f0" stroke-width="2.5"/>
+    <line x1="38" y1="366" x2="52" y2="366" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="41" y1="372" x2="49" y2="372" stroke="#e2e8f0" stroke-width="1.5"/>
+    <text x="56" y="348" fill="#94a3b8" font-size="8">GG010</text>
+
+    <!-- Surge arrester (GV) -->
+    <line x1="80" y1="330" x2="120" y2="330" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="120" y1="330" x2="120" y2="345" stroke="#e2e8f0" stroke-width="2"/>
+    <polygon points="120,345 112,362 128,362" fill="none" stroke="#e2e8f0" stroke-width="1.5"/>
+    <line x1="112" y1="366" x2="128" y2="366" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="120" y1="366" x2="120" y2="375" stroke="#e2e8f0" stroke-width="1.5"/>
+    <line x1="110" y1="375" x2="130" y2="375" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="114" y1="381" x2="126" y2="381" stroke="#e2e8f0" stroke-width="1.5"/>
+    <text x="132" y="356" fill="#94a3b8" font-size="8">GV</text>
+
+    <!-- Line continues down to feeder -->
+    <line x1="80" y1="330" x2="80" y2="390" stroke="#e2e8f0" stroke-width="2"/>
+    <!-- DIS GS220 - no circle at lower end -->
+    <circle cx="80" cy="391" r="3" fill="#e2e8f0"/>
+    <line x1="80" y1="391" x2="80" y2="411" stroke="#e2e8f0" stroke-width="2" transform="rotate(-30 80 391)"/>
+    <line x1="80" y1="415" x2="80" y2="440" stroke="#e2e8f0" stroke-width="2"/>
+    <text x="90" y="406" fill="#94a3b8" font-size="8">GS220</text>
+
+    <!-- Line end -->
+    <line x1="80" y1="440" x2="80" y2="465" stroke="#e2e8f0" stroke-width="2"/>
+    <polygon points="80,480 68,460 92,460" fill="#e2e8f0"/>
+    <text x="90" y="468" fill="#38bdf8" font-size="9" font-weight="bold">FI1 →</text>
+    <text x="60" y="490" fill="#64748b" font-size="8">Fitjalína 1</text>
+  </svg>
+  <h3>132kV feeder bay</h3>
+  <p>Dæmi: FI1 bay</p>
+</div>
+</div>
+</div>
+
+</body>
+</html>

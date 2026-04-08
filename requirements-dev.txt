@@ -1,0 +1,2 @@
+# Development and testing (Python)
+pytest>=7.0.0

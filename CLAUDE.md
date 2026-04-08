@@ -51,6 +51,23 @@ This is a dual-stack project: a **React/TypeScript browser app** and a **Python 
 - `src/validation/landsnet/runLandsnetValidation.ts` — entry point; returns `LandsnetValidationReport`
 - `src/validation/landsnet/buildDictionaries.ts` — builds MMS/GOOSE/SV dictionaries from model
 
+**Diagnostics framework** (`src/diagnostics/`):
+OpenSCD-compatible validator plugin system with event-driven architecture:
+- `src/diagnostics/types.ts` — `IssueSeverity` (`'error' | 'warning' | 'info'`), `IssueDetail`, `DiagnosticsSnapshot`
+- `src/diagnostics/store.ts` — `DiagnosticsStore` class; pub/sub listener pattern; `setIssues()`, `clearIssues()`, `clearAll()`, `subscribe()`
+- `src/diagnostics/events.ts` — custom DOM event emission: `newIssueEvent()`, `emitIssue()`, `emitIssues()`
+- `src/diagnostics/ui.ts` — `DiagnosticsUI` class; framework-agnostic panel renderer; listens to issue events and store changes
+
+**Validator plugin system** (`src/validators/`):
+- `src/validators/example.ts` — example validators: `validateSchema()`, `validateTemplates()`, `runExampleValidators()`; integrates with `DiagnosticsStore`
+
+**Network topology module** (`src/network/`):
+Complete subnetwork traffic analysis:
+- `src/network/types.ts` — `TrafficProtocol`, `FlowCounter`, `PortFlowItem`, `PortTrafficSummary`, `NetworkSwitchNode`, `NetworkTopologyView`, `NetworkPortSummaryRow`
+- `src/network/buildNetworkView.ts` — `buildNetworkTopologyView()` entry point; `discoverSubNetworks()`; switch/port traffic aggregation; flow filtering by protocol/direction/resolution
+- `src/network/networkUi.ts` — `buildPortTableRows()` → `NetworkPortTableRowModel[]`; `TableQuickFilters` with device type (`'all' | 'F' | 'S1' | 'P1'`), protocol, health (`'resolved' | 'probable' | 'unresolved'`) filters
+- `src/network/export.ts` — network data export functions
+
 **App modes** (`appMode` state in App.tsx, exported as `AppMode` type):
 
 | Mode | Icon | Component | Notes |
@@ -64,6 +81,7 @@ This is a dual-stack project: a **React/TypeScript browser app** and a **Python 
 | `ied` | ◈ | IedExplorer | two-pane: IED list + expandable tree |
 | `version` | ◑ | VersionPanel | Header info card + full History table, lock badge |
 | `sld` | ⏚ | SubstationDiagram | Single Line Diagram; pan/zoom SVG canvas; IEC 60617 symbols; IED chips per equipment; voltage filter pills; auto-fit on load; double-click canvas to fit |
+| `compare` | ◑ | Compare panels | diff view driven by `compareVariant`/`showOnlyChanges`/`selectedChangeId`/`changeFilters` |
 
 **Startup screen** (`src/components/StartupScreen.tsx`):
 - Shown when `!model && !error`; two main cards (Open / Compare) + optional "Continue last session" card
@@ -76,6 +94,9 @@ This is a dual-stack project: a **React/TypeScript browser app** and a **Python 
 - `compareViewFile: 'A' | 'B' | null` — overrides `activeModel`; shows "← Back to diff" banner
 - `CompareAssignDialog` — modal asking if loaded file is A (old) or B (new)
 - `pendingCompareSlot: 'A' | 'B' | null` — tracks which slot awaits second file
+- `showOnlyChanges`, `selectedChangeId`, `changeFilters` — filter/select changes in compare view
+- `CompareBar.tsx` — top bar for compare mode: tabs (`'single' | 'compare'`), Load Baseline/New buttons, file name badges, "Show only changes" checkbox
+- `ChangesPanel.tsx` — diff change list; filters by type (`all | added | modified | removed`), area, query; export as JSON/CSV
 
 **Waived checks:**
 - `waivedChecks: Set<string>` in App.tsx, persisted to `localStorage('vm-waived-checks')`
@@ -90,7 +111,7 @@ This is a dual-stack project: a **React/TypeScript browser app** and a **Python 
 - Derived in App.tsx from file extension: `.scd`→`SCD`, `.cid`→`CID`, `.icd`→`ICD`, `.iid`→`IID`, `.ssd`→`SSD`, `.xml`→`XML`
 
 **UI layout (dark-pro three-pane):**
-- `src/App.tsx` — startup screen (no file) or `ThreePaneLayout`
+- `src/App.tsx` — startup screen (no file) or `ThreePaneLayout`; 1073 lines; manages all compare/diff state refs
 - `src/components/TopBar.tsx` — logo, file badge + file type chip + lock badge, issue count, Load File, Compare, Export, Search
 - `src/components/SubstationTree.tsx` — left pane; Substation→VoltageLevel→Bay→IED hierarchy with inline ✓/✗ badges
 - `src/components/ValidationMatrix.tsx` — 26-check × IED grid; `CheckInfoPopup` on title click
@@ -99,11 +120,23 @@ This is a dual-stack project: a **React/TypeScript browser app** and a **Python 
 - `src/components/AddressesTable.tsx` — 4 sub-view tabs
 - `src/components/SubscriptionMatrix.tsx` — publisher×subscriber matrix with 3 protocol tabs: GOOSE, SV, Reports
 - `src/components/GraphCanvas.tsx` — ReactFlow graph
+- `src/components/GraphView.tsx` — ReactFlow graph wrapper; `onSelectEdge()`, `onSelectNode()`; zoom 0.2–1.5; MiniMap + Controls
 - `src/components/InspectorPanel.tsx` — right pane: Summary/Dataset/Diff/XML tabs
+- `src/components/DetailsPanel.tsx` — right-pane details: Edge (publisher, subscriber, FCDAs), IED/DataSet/GSE/SV/Report properties, raw XML snippet, outgoing flows
 - `src/components/NetworkVisualizerPanel.tsx` — ReactFlow network topology; `showHeat` toggle colors nodes (`net-node-cold/warm/hot/fire`) and edges by estimated Mbps; traffic legend overlay
 - `src/components/VersionPanel.tsx` — Header info card + full History table; lock badge
 - `src/components/SubstationDiagram.tsx` — SLD canvas: pan (drag), zoom (wheel, non-passive native listener), auto-fit on load, double-click to fit, pan bounds via `clampT()` (200px margin)
 - `src/components/ThreePaneLayout.tsx` — drag-resizable, widths in localStorage
+- `src/components/NavigatorPanel.tsx` — multi-tab sidebar; tabs: `'ieds' | 'datasets' | 'flows' | 'issues'`; uses `VirtualList`; row height 56px (IEDs) / 72px (issues)
+- `src/components/IssuesPanel.tsx` — virtualized issues panel; filters: severity, category, protocol, status, query; export JSON/CSV/Landsnet JSON
+- `src/components/CommandPalette.tsx` — keyboard-driven search: IEDs, LNs, datasets, control blocks; arrow-key navigation; up to 80 results; Escape to close
+
+**Virtual list & network tables** (`src/components/network/`):
+- `src/components/network/VirtualList.tsx` — generic virtualization; props: `items[]`, `rowHeight`, `height`, `overscan`, `renderRow()`; calculates visible range from scroll
+- `src/components/network/NetworkPortTable.tsx` — network port table using `VirtualList`; columns: IED, Device, Bay/LD, GOOSE, SV, REPORT, Unresolved, Health
+
+**UI component library** (`src/components/ui/`):
+- `Badge.tsx`, `Card.tsx`, `Chip.tsx`, `EmptyState.tsx`, `Tabs.tsx`, `Toast.tsx` — shared primitives; exported via `index.ts`
 
 **Statistics:**
 - `src/utils/scdStatistics.ts` — `computeScdStatistics(model)` → `ScdStatistics`; includes `iedTraffic: IedTrafficRow[]` (sorted by `estMbps`) and `revisionHistory: HitemModel[]`
@@ -153,8 +186,12 @@ Each issue has `severity: 'error' | 'warn'` and `fixHint: string` (actionable in
 - `src/diff/report.ts` — `buildDiffReport(diff)` for JSON export
 - `src/diff/applyDiffDecorations.ts` — annotates graph nodes with change status
 
+**Graph visibility:**
+- `src/utils/graphVisibility.ts` — `deriveVisibleGraph()` applies protocol, IED list, resolution status, search query, focus+depth, and hide-isolated-nodes filters; returns `VisibleGraph` with `visibleIeds`, `visibleEdges`, `issues`; `DerivedIssue` for graph-derived warnings
+
 ### Export
 
 - `src/utils/exportCsv.ts` — GOOSE matrix, detailed flows, protocol summary, changes, validation CSV
 - `src/utils/exportExcel.ts` — Excel workbook; honours `ExportSheetsOption` (`all | ip_only | signals_only`)
 - `src/utils/exportLandsnetJson.ts` — Landsnet compliance JSON
+- `src/utils/exportNetworkPdf.ts` — `printNetworkSummary()` opens print window with formatted HTML; per-subnet tables with port counts, MAC/IP/VLAN info

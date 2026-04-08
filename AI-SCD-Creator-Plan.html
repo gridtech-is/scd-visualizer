@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI SCD Creator — Verkefnaáætlun</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #263347;
+      --accent: #38bdf8;
+      --accent2: #818cf8;
+      --green: #34d399;
+      --orange: #fb923c;
+      --red: #f87171;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f2040 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 64px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .header-tag {
+      display: inline-block;
+      background: rgba(56,189,248,0.12);
+      border: 1px solid rgba(56,189,248,0.3);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .header h1 span { color: var(--accent); }
+    .header .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 600px;
+    }
+    .header-meta {
+      margin-top: 24px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .meta-item .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 48px 64px; }
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin: 48px 0 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2 .h2-num {
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 11px;
+      font-weight: 800;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 24px 0 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 12px;
+    }
+    p { color: var(--muted); margin-bottom: 12px; }
+    p strong { color: var(--text); font-weight: 600; }
+
+    /* Vision box */
+    .vision-box {
+      background: linear-gradient(135deg, rgba(56,189,248,0.08), rgba(129,140,248,0.06));
+      border: 1px solid rgba(56,189,248,0.2);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin: 24px 0 32px;
+    }
+    .vision-box p {
+      font-size: 16px;
+      color: var(--text);
+      line-height: 1.8;
+    }
+    .vision-box p em { color: var(--accent); font-style: normal; font-weight: 600; }
+
+    /* Cards grid */
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 20px 0 32px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 22px;
+    }
+    .card .card-icon { font-size: 22px; margin-bottom: 10px; }
+    .card .card-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .card .card-body { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .card.accent-border { border-left: 3px solid var(--accent); }
+    .card.green-border { border-left: 3px solid var(--green); }
+    .card.orange-border { border-left: 3px solid var(--orange); }
+    .card.purple-border { border-left: 3px solid var(--accent2); }
+
+    /* Feature list */
+    .feature-group { margin: 20px 0 32px; }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .feature-item .fi-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .feature-item .fi-content .fi-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .feature-item .fi-content .fi-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .fi-badge {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .badge-mvp { background: rgba(56,189,248,0.15); color: var(--accent); border: 1px solid rgba(56,189,248,0.3); }
+    .badge-v2  { background: rgba(129,140,248,0.15); color: var(--accent2); border: 1px solid rgba(129,140,248,0.3); }
+    .badge-v3  { background: rgba(251,146,60,0.15); color: var(--orange); border: 1px solid rgba(251,146,60,0.3); }
+
+    /* Architecture diagram */
+    .arch {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      margin: 20px 0 32px;
+    }
+    .arch-row {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+      margin-bottom: 12px;
+    }
+    .arch-box {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .arch-box .ab-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .arch-box .ab-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .arch-box .ab-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .arch-box.new { border-color: rgba(56,189,248,0.4); background: rgba(56,189,248,0.04); }
+    .arch-box.new .ab-label { color: var(--accent); }
+    .arch-box.reuse { border-color: rgba(52,211,153,0.4); background: rgba(52,211,153,0.04); }
+    .arch-box.reuse .ab-label { color: var(--green); }
+    .arch-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 18px;
+      padding: 0 4px;
+    }
+    .arch-legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .arch-legend .leg-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .leg-dot-new {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      background: rgba(56,189,248,0.3);
+      border: 1px solid var(--accent);
+    }
+    .leg-dot-reuse {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      background: rgba(52,211,153,0.3);
+      border: 1px solid var(--green);
+    }
+
+    /* Tech stack */
+    .stack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0 32px; }
+    .stack-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+    }
+    .stack-item .si-layer {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .si-tech { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tech-pill {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .tech-pill.highlight { background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.3); color: var(--accent); }
+
+    /* Roadmap / Todo */
+    .phase { margin: 24px 0; }
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      border-radius: 8px 8px 0 0;
+      border: 1px solid var(--border);
+    }
+    .phase-header.ph-1 { background: rgba(56,189,248,0.1); border-color: rgba(56,189,248,0.3); }
+    .phase-header.ph-2 { background: rgba(129,140,248,0.1); border-color: rgba(129,140,248,0.3); }
+    .phase-header.ph-3 { background: rgba(251,146,60,0.1); border-color: rgba(251,146,60,0.3); }
+    .ph-num {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+    .ph-1 .ph-num { color: var(--accent); }
+    .ph-2 .ph-num { color: var(--accent2); }
+    .ph-3 .ph-num { color: var(--orange); }
+    .ph-title { font-size: 15px; font-weight: 700; color: #fff; }
+    .ph-duration {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .todo-list {
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+    }
+    .todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .todo-item:last-child { border-bottom: none; }
+    .todo-check {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .todo-text .tt-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .todo-text .tt-sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .todo-cat {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .cat-fe  { background: rgba(56,189,248,0.12); color: var(--accent); }
+    .cat-ai  { background: rgba(129,140,248,0.12); color: var(--accent2); }
+    .cat-be  { background: rgba(52,211,153,0.12); color: var(--green); }
+    .cat-ux  { background: rgba(251,146,60,0.12); color: var(--orange); }
+    .cat-inf { background: rgba(248,113,113,0.12); color: var(--red); }
+
+    /* Research note */
+    .research-note {
+      display: flex;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin: 16px 0;
+    }
+    .research-note .rn-icon { font-size: 20px; flex-shrink: 0; }
+    .research-note .rn-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .research-note .rn-body { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .research-note .rn-body a { color: var(--accent); text-decoration: none; }
+    .research-note .rn-body a:hover { text-decoration: underline; }
+
+    /* Risk table */
+    .risk-table { width: 100%; border-collapse: collapse; margin: 20px 0 32px; }
+    .risk-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .risk-table td {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .risk-table td strong { color: var(--text); }
+    .risk-table tr:last-child td { border-bottom: none; }
+    .risk-table tr { background: var(--surface); }
+    .risk-table tr:nth-child(even) { background: var(--bg); }
+    .risk-high { color: var(--red) !important; font-weight: 700; }
+    .risk-med  { color: var(--orange) !important; font-weight: 700; }
+    .risk-low  { color: var(--green) !important; font-weight: 700; }
+
+    /* Footer */
+    .footer {
+      margin-top: 64px;
+      padding: 28px 64px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-left { font-size: 13px; color: var(--muted); }
+    .footer-right { font-size: 13px; color: var(--muted); }
+    .footer-right span { color: var(--accent); font-weight: 600; }
+
+    @media (max-width: 700px) {
+      .header, .container, .footer { padding: 28px 20px; }
+      .stack-grid { grid-template-columns: 1fr; }
+      .arch-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-tag">GridTech Consulting · Verkefnaáætlun 2026</div>
+  <h1><span>AI</span>-knúinn SCD Creator</h1>
+  <p class="subtitle">Snjallt forrit sem leyfir verkfræðingum og notendum að búa til, breyta og staðfesta SCD skrár í gegnum náttúrulegt samtal við gervigreind.</p>
+  <div class="header-meta">
+    <div class="meta-item"><div class="dot"></div> Sett saman: 31. mars 2026</div>
+    <div class="meta-item"><div class="dot" style="background:var(--accent)"></div> Theodór Jónsson — GridTech</div>
+    <div class="meta-item"><div class="dot" style="background:var(--orange)"></div> IEC 61850 · SCD/SCL</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- SECTION 1: VISION -->
+  <h2><span class="h2-num">1</span> Sýn og markmið</h2>
+  <div class="vision-box">
+    <p>
+      Við erum að byggja fyrsta <em>AI-knúna SCD hönnunarforritið</em> — þar sem verkfræðingur lýsir substation-inu sínu í einföldum orðum og gervigreindin myndar gilda, staðfesta SCD skrá samkvæmt IEC 61850. Notandinn getur <em>talað við kerfið</em>, beðið það um breytingar, fengið útskýringar og einnig klárað smáatriðin handvirkt. Þetta er alveg nýtt svæði — <em>enginn er þarna</em>.
+    </p>
+  </div>
+
+  <div class="cards">
+    <div class="card accent-border">
+      <div class="card-icon">💬</div>
+      <div class="card-title">AI Samtal</div>
+      <div class="card-body">Lýsir þú substation-inu? AI-ið myndar SCD-ið. Biður þú um breytingu? Það gerir hana. Einfalt.</div>
+    </div>
+    <div class="card green-border">
+      <div class="card-icon">✅</div>
+      <div class="card-title">Bein staðfesting</div>
+      <div class="card-body">Allar 26 reglurnar (LNET + IEC) keyra strax þegar AI-ið myndar eða breytir — notandinn sér villur augnablikslega.</div>
+    </div>
+    <div class="card orange-border">
+      <div class="card-icon">🔧</div>
+      <div class="card-title">Handvirk klára</div>
+      <div class="card-body">Kraftmikill handvirkur ritill sem gerir ráð fyrir IEC 61850 sérfræðingum — form-based og XML-view.</div>
+    </div>
+    <div class="card purple-border">
+      <div class="card-icon">🌐</div>
+      <div class="card-title">Alþjóðleg markaðsstaðan</div>
+      <div class="card-body">Ekkert svipað forrit er til. Þetta staðsetur GridTech sem leiðandi tæknifyrirtæki í IEC 61850 heiminum.</div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 2: RESEARCH -->
+  <h2><span class="h2-num">2</span> Rannsóknarniðurstöður</h2>
+  <p>Eftirfarandi verkfæri eru til og þarf að taka tillit til þeirra:</p>
+
+  <div class="research-note">
+    <div class="rn-icon">🔓</div>
+    <div>
+      <div class="rn-title">OpenSCD — Open Substation Communication Designer</div>
+      <div class="rn-body">
+        Opinn uppspretta SCD ritill, LitElement/Web Components, plugin-miðaður arkitektúr. Virkur til 2026. Apache 2.0 leyfi. Hægt að nota sem grunn eða plugin-host.
+        <br/><a href="https://github.com/openscd/open-scd" target="_blank">github.com/openscd/open-scd</a>
+        &nbsp;·&nbsp;
+        <a href="https://openscd.github.io" target="_blank">openscd.github.io</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="research-note">
+    <div class="rn-icon">🏭</div>
+    <div>
+      <div class="rn-title">CoMPAS OpenSCD — Enterprise útgáfa með bakendaþjónustu</div>
+      <div class="rn-body">
+        Fork af OpenSCD með CoMPAS bakendaþjónustu. Hentar stórfyrirtækjum sem þurfa server-hliðar geymslu.
+        <br/><a href="https://github.com/com-pas/compas-open-scd" target="_blank">github.com/com-pas/compas-open-scd</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="research-note">
+    <div class="rn-icon">💰</div>
+    <div>
+      <div class="rn-title">ASE61850 SCL Manager — Leiðandi viðskiptaverkfæri</div>
+      <div class="rn-body">
+        Fremsta viðskiptaforritið. Stuðlar við Ed. 1.0, 2.0, 2.1. Dýrt, flókið, engin AI. <strong>Þetta er keppinauturinn.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="research-note">
+    <div class="rn-icon">🤖</div>
+    <div>
+      <div class="rn-title">Núverandi kóðagrunnur — Stór forskot</div>
+      <div class="rn-body">
+        Verkefnið sem við höfum þegar inniheldur: <strong>SCD þáttara</strong> (XML → SclModel), <strong>26 villureglur</strong> (LNET + IEC), <strong>netmótun</strong>, <strong>samanburðarmót</strong>, <strong>myndræna framsetningu</strong> og <strong>Python CLI</strong>. Við þurfum <em>ekki að byrja frá grunni</em> — við bætum AI-laginu ofan á þetta.
+      </div>
+    </div>
+  </div>
+
+  <div class="research-note">
+    <div class="rn-icon">⚡</div>
+    <div>
+      <div class="rn-title">Markaðstækifærið</div>
+      <div class="rn-body">
+        <strong>Ekkert AI-knúið SCD myndunartæki er til í heiminum.</strong> Kalkitech/ASE gerðu reglubundna sjálfvirkni (CSV → SCD), en ekkert samtalstæki. Þetta er tækifæri til að setja GridTech á kortið sem nýsköpunarfyrirtæki.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 3: ARCHITECTURE -->
+  <h2><span class="h2-num">3</span> Arkitektúr forritsins</h2>
+
+  <p>Við byggjum <strong>tvær útgáfur saman</strong> — AI samtalsviðmótið ofan á núverandi staðfestingu- og þáttaragrunninn.</p>
+
+  <div class="arch">
+    <h3 style="margin-top:0">Yfirlit — Lög kerfisins</h3>
+
+    <div class="arch-row">
+      <div class="arch-box new">
+        <div class="ab-label">NYR · UI</div>
+        <div class="ab-title">AI Samtalspannel</div>
+        <div class="ab-sub">Chat UI · Streymandi svör · XML forskoðun</div>
+      </div>
+      <div class="arch-box new">
+        <div class="ab-label">NYR · UI</div>
+        <div class="ab-title">Handvirkur ritill</div>
+        <div class="ab-sub">Form-based · JSON/XML view · IED wizard</div>
+      </div>
+      <div class="arch-box reuse">
+        <div class="ab-label">ENDURNOTAÐ</div>
+        <div class="ab-title">Myndræn framsetning</div>
+        <div class="ab-sub">Dashboard · Graph · Network · SLD</div>
+      </div>
+    </div>
+
+    <div class="arch-row" style="align-items:center; margin-bottom:0">
+      <div class="arch-arrow" style="flex:0 0 40px">↑↓</div>
+      <div class="arch-arrow" style="flex:1; text-align:center; font-size:12px; color:var(--muted)">Unified SclModel</div>
+      <div class="arch-arrow" style="flex:0 0 40px">↑↓</div>
+    </div>
+
+    <div class="arch-row" style="margin-top:12px">
+      <div class="arch-box new">
+        <div class="ab-label">NYR · BAKENDI</div>
+        <div class="ab-title">AI Kjarninn</div>
+        <div class="ab-sub">Claude API · IEC 61850 þekking · XML myndun · Tool-use</div>
+      </div>
+      <div class="arch-box reuse">
+        <div class="ab-label">ENDURNOTAÐ</div>
+        <div class="ab-title">SCD Þáttari</div>
+        <div class="ab-sub">sclParser.ts · SclModel · parseSld()</div>
+      </div>
+      <div class="arch-box reuse">
+        <div class="ab-label">ENDURNOTAÐ</div>
+        <div class="ab-title">Villuleit (26 reglur)</div>
+        <div class="ab-sub">LNET 001–018 · IEC 001–008 · XSD</div>
+      </div>
+    </div>
+
+    <div class="arch-legend">
+      <div class="leg-item"><div class="leg-dot-new"></div> Nýr kóði (að skrifa)</div>
+      <div class="leg-item"><div class="leg-dot-reuse"></div> Endurnotaður kóði (til staðar)</div>
+    </div>
+  </div>
+
+  <h3>Hvernig AI-ið virkar — Tool-use líkan</h3>
+  <p>Við notum <strong>Claude API með structured outputs og tool-use</strong>. AI-ið fær:</p>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">📚</div>
+      <div class="card-title">IEC 61850 þekkingargrunnur</div>
+      <div class="card-body">XSD schema, GOOSE/SV reglur, dæmi SCD skrár, LNET staðlar sem system prompt.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔨</div>
+      <div class="card-title">SCD verkfæri (Tools)</div>
+      <div class="card-body"><code>add_ied()</code>, <code>add_goose_subscription()</code>, <code>set_vlan()</code>, <code>generate_scd_xml()</code> — AI kallar á þessi föll.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <div class="card-title">Bein endurgjöf</div>
+      <div class="card-body">Þegar AI-ið myndar XML, keyrir staðfestingin strax. Villur fara aftur í AI-ið til leiðréttingar.</div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 4: FEATURES -->
+  <h2><span class="h2-num">4</span> Aðgerðir forritsins</h2>
+
+  <h3>MVP — Fyrsta útgáfa</h3>
+  <div class="feature-group">
+
+    <div class="feature-item">
+      <div class="fi-icon">💬</div>
+      <div class="fi-content">
+        <div class="fi-title">AI Samtalsmót — SCD myndun</div>
+        <div class="fi-desc">Notandi lýsir substation: "Ég þarf 5 IED, 2 GOOSE tengingar á 110kV spennu, VLAN 100." AI myndar gilda SCD skrá og sýnir hana.</div>
+      </div>
+      <div class="fi-badge badge-mvp">MVP</div>
+    </div>
+
+    <div class="feature-item">
+      <div class="fi-icon">✏️</div>
+      <div class="fi-content">
+        <div class="fi-title">AI Breytingar í gegnum samtal</div>
+        <div class="fi-desc">"Bættu við GOOSE tengingu frá IED_A til IED_B." — AI uppfærir XML og staðfestir strax.</div>
+      </div>
+      <div class="fi-badge badge-mvp">MVP</div>
+    </div>
+
+    <div class="feature-item">
+      <div class="fi-icon">📋</div>
+      <div class="fi-content">
+        <div class="fi-title">ICD skráar inn → SCD út</div>
+        <div class="fi-desc">Notandi hleður upp ICD skrám og AI-ið saman þær í SCD. Eitt af helstu notkunartilfellum í IEC 61850 hönnun.</div>
+      </div>
+      <div class="fi-badge badge-mvp">MVP</div>
+    </div>
+
+    <div class="feature-item">
+      <div class="fi-icon">🔍</div>
+      <div class="fi-content">
+        <div class="fi-title">Sjálfvirk staðfesting + AI útskýring</div>
+        <div class="fi-desc">Þegar villa finnst sýnir AI-ið hvað er vitlaust, hvers vegna, og hvað á að gera — ekki bara villukóðann.</div>
+      </div>
+      <div class="fi-badge badge-mvp">MVP</div>
+    </div>
+
+    <div class="feature-item">
+      <div class="fi-icon">👁️</div>
+      <div class="fi-content">
+        <div class="fi-title">Myndræn forskoðun (endurnotað)</div>
+        <div class="fi-desc">Notandi sér graph, dashboard og SLD strax eftir AI-myndun. Engin viðbótarforritun þarf — þetta er til.</div>
+      </div>
+      <div class="fi-badge badge-mvp">MVP</div>
+    </div>
+
+    <div class="feature-item">
+      <div class="fi-icon">💾</div>
+      <div class="fi-content">
+        <div class="fi-title">Export SCD / XML</div>
+        <div class="fi-desc">Hlaða niður lokaúttakinu sem gildu SCD skrá sem hægt er að nota í IED stillingartæki.</div>
+      </div>
+      <div class="fi-badge badge-mvp">MVP</div>
+    </div>
+  </div>
+
+  <h3>Útgáfa 2 — Kraftmikið handvirkt mót</h3>
+  <div class="feature-group">
+
+    <div class="feature-item">
+      <div class="fi-icon">🖊️</div>
+      <div class="fi-content">
+        <div class="fi-title">Form-based IED ritill</div>
+        <div class="fi-desc">Bæta við, breyta og eyða IEDs, DataSets, GOOSE og SV stýringarblokkum í gegnum þægilegt form.</div>
+      </div>
+      <div class="fi-badge badge-v2">V2</div>
+    </div>
+
+    <div class="feature-item">
+      <div class="fi-icon">🧙</div>
+      <div class="fi-content">
+        <div class="fi-title">Substation Wizard</div>
+        <div class="fi-desc">Skref-fyrir-skref leiðsögn: substation → voltage levels → bays → IEDs → GOOSE → SV → SCD. Blandaðar AI og handvirkar aðgerðir.</div>
+      </div>
+      <div class="fi-badge badge-v2">V2</div>
+    </div>
+
+    <div class="feature-item">
+      <div class="fi-icon">🔁</div>
+      <div class="fi-content">
+        <div class="fi-title">Undo/Redo með samtalssögu</div>
+        <div class="fi-desc">Öll breyting er skráð — notandi getur farið til baka í áður samtal og tekið upp þráðinn.</div>
+      </div>
+      <div class="fi-badge badge-v2">V2</div>
+    </div>
+
+    <div class="feature-item">
+      <div class="fi-icon">🌍</div>
+      <div class="fi-content">
+        <div class="fi-title">Fjöltyngis stuðningur</div>
+        <div class="fi-desc">AI-ið svarar á íslensku, ensku, þýsku. Notandi velur tungumál. Sérstaklega mikilvægt fyrir þjálfun og kynningu.</div>
+      </div>
+      <div class="fi-badge badge-v2">V2</div>
+    </div>
+  </div>
+
+  <h3>Útgáfa 3 — Enterprise og samstarf</h3>
+  <div class="feature-group">
+    <div class="feature-item">
+      <div class="fi-icon">☁️</div>
+      <div class="fi-content">
+        <div class="fi-title">CoMPAS/server bakendi</div>
+        <div class="fi-desc">Vista og hlaða SCD skrár af þjóni — fyrir stórfyrirtæki með margar substation-ar.</div>
+      </div>
+      <div class="fi-badge badge-v3">V3</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-icon">📊</div>
+      <div class="fi-content">
+        <div class="fi-title">Línurit og PDF skýrslugerð</div>
+        <div class="fi-desc">AI myndar sjálfkrafa skýrslu um substation-ið: tæknilýsing, GOOSE matrix, villa samantekt.</div>
+      </div>
+      <div class="fi-badge badge-v3">V3</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-icon">🔌</div>
+      <div class="fi-content">
+        <div class="fi-title">OpenSCD plugin</div>
+        <div class="fi-desc">Pakka AI-ið sem OpenSCD plugin — notendur sem nota OpenSCD þegar geta notað AI-ið beint í sitt tæki.</div>
+      </div>
+      <div class="fi-badge badge-v3">V3</div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 5: TECH STACK -->
+  <h2><span class="h2-num">5</span> Tæknistafli</h2>
+
+  <div class="stack-grid">
+    <div class="stack-item">
+      <div class="si-layer">Frontend</div>
+      <div class="si-tech">
+        <span class="tech-pill highlight">React 19</span>
+        <span class="tech-pill highlight">TypeScript</span>
+        <span class="tech-pill">Vite</span>
+        <span class="tech-pill">ReactFlow</span>
+        <span class="tech-pill">Tailwind / CSS vars</span>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="si-layer">AI Lag</div>
+      <div class="si-tech">
+        <span class="tech-pill highlight">Anthropic Claude API</span>
+        <span class="tech-pill">Tool Use (structured output)</span>
+        <span class="tech-pill">Vercel AI SDK</span>
+        <span class="tech-pill">Streaming responses</span>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="si-layer">SCD Kjarni (endurnotað)</div>
+      <div class="si-tech">
+        <span class="tech-pill highlight">sclParser.ts</span>
+        <span class="tech-pill highlight">runLandsnetValidation</span>
+        <span class="tech-pill">xmllint-wasm</span>
+        <span class="tech-pill">Python CLI</span>
+      </div>
+    </div>
+    <div class="stack-item">
+      <div class="si-layer">Bakendi / API</div>
+      <div class="si-tech">
+        <span class="tech-pill highlight">Next.js API Routes</span>
+        <span class="tech-pill">Node.js</span>
+        <span class="tech-pill">Supabase / SQLite</span>
+        <span class="tech-pill">Vercel (deploy)</span>
+      </div>
+    </div>
+  </div>
+
+  <p><strong>Lykilákvörðun:</strong> Við notum <strong>Anthropic Claude API</strong> — það er best að nota rétt verkfæri. Claude skilur XML og XSD schema mjög vel, og með tool-use getum við tryggt að allt XML sé gilt. Við notum <em>Vercel AI SDK</em> til að streyma svör í samtalsmótið þannig að notandinn sér svar koma staf-fyrir-staf eins og í ChatGPT.</p>
+
+
+  <!-- SECTION 6: TODO ROADMAP -->
+  <h2><span class="h2-num">6</span> Verkefnalisti og vegvísir</h2>
+
+  <!-- PHASE 1 -->
+  <div class="phase">
+    <div class="phase-header ph-1">
+      <span class="ph-num">FASI 1</span>
+      <span class="ph-title">MVP — AI Samtal + Myndun</span>
+      <span class="ph-duration">~4–6 vikur</span>
+    </div>
+    <div class="todo-list">
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Setja upp nýtt Next.js verkefni með AI Chat viðmóti</div>
+          <div class="tt-sub">Next.js 14 + Vercel AI SDK + Anthropic claude-sonnet-4-6. Básískt samtalsmót með streymandi svörum.</div>
+        </div>
+        <div class="todo-cat cat-fe">Frontend</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Byggja IEC 61850 þekkingargrunn sem system prompt</div>
+          <div class="tt-sub">Safna saman IEC 61850-6 XSD, GOOSE/SV reglum, LNET staðlum, dæmi SCD skrám. Þjappa sem AI system context.</div>
+        </div>
+        <div class="todo-cat cat-ai">AI</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Skilgreina AI "tools" — SCD myndaðar aðgerðir</div>
+          <div class="tt-sub"><code>generate_scd(description)</code>, <code>add_ied(params)</code>, <code>add_goose_link(pub, sub)</code>, <code>set_communication(vlan, appid)</code> osfrv.</div>
+        </div>
+        <div class="todo-cat cat-ai">AI</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Tengja núverandi þáttara og staðfestingarreglur</div>
+          <div class="tt-sub">Ganga úr skugga um að sclParser.ts og runLandsnetValidation() keyri sem einangraðir pakkar sem nýja Next.js forritið getur kallað á.</div>
+        </div>
+        <div class="todo-cat cat-be">Kjarni</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Live villa-endurgjöf í samtalsviðmótinu</div>
+          <div class="tt-sub">Þegar AI myndar SCD, keyrir staðfestingin strax og niðurstöðurnar birtast hlið-við-hlið við samtalið. Villutalningur í chat-haus.</div>
+        </div>
+        <div class="todo-cat cat-fe">Frontend</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">XML / SCD forskoðun hlið-við-hlið við samtal</div>
+          <div class="tt-sub">Split-skjár: chat til vinstri, SCD XML (með syntax highlighting) til hægri. Smellt á villa → hoppar í ranga línu XML.</div>
+        </div>
+        <div class="todo-cat cat-fe">Frontend</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">ICD skrár inn → AI-aðstoð SCD myndun</div>
+          <div class="tt-sub">Notandi hleður upp 1–N ICD skrár. AI les þær, skilur getu hvers IED og stingur upp á réttu GOOSE/SV tengingum.</div>
+        </div>
+        <div class="todo-cat cat-ai">AI</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Export — Hlaða niður gildri SCD skrá</div>
+          <div class="tt-sub">Einfaldur "Sækja SCD" hnappur. Skráin er staðfest áður en hún er gefa út notandanum.</div>
+        </div>
+        <div class="todo-cat cat-fe">Frontend</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Tengja myndrænu framsetningu (endurnotun)</div>
+          <div class="tt-sub">Sýna Dashboard, Graph og SLD úr núverandi kóðagrunni þegar SCD er tilbúið — sem "flipar" í viðmótinu.</div>
+        </div>
+        <div class="todo-cat cat-fe">Frontend</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Notendaprófun og fínpússun á AI samtalinu</div>
+          <div class="tt-sub">Prófa með raunverulegum IEC 61850 verkfræðingum. Laga system prompt þar til niðurstöður eru áreiðanlegar.</div>
+        </div>
+        <div class="todo-cat cat-ux">UX/Test</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase">
+    <div class="phase-header ph-2">
+      <span class="ph-num">FASI 2</span>
+      <span class="ph-title">Kraftmikill handvirkur ritill + Wizard</span>
+      <span class="ph-duration">~6–8 vikur</span>
+    </div>
+    <div class="todo-list">
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Form-based IED ritill</div>
+          <div class="tt-sub">Bæta við, breyta, eyða IEDs, LDevices, DataSets, GOOSE og SV control blocks í gegnum form. Inline staðfesting.</div>
+        </div>
+        <div class="todo-cat cat-fe">Frontend</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Substation Wizard — Skref-fyrir-skref leiðsögn</div>
+          <div class="tt-sub">Leiðir notanda í gegnum: Substation → VoltageLevel → Bay → IED → Communication → Export. Blandaðar AI tillögur og handvirk inntök.</div>
+        </div>
+        <div class="todo-cat cat-ux">UX</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Undo/Redo — Breytingarsaga</div>
+          <div class="tt-sub">Öll breyting geymd í Command pattern. Ctrl+Z/Y virkar. Samtalssaga tengist við skjalasögu.</div>
+        </div>
+        <div class="todo-cat cat-fe">Frontend</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">AI útskýringar á villum — "Fix it" hnappur</div>
+          <div class="tt-sub">Á hverja villu er "Útskýra" og "Laga" hnappur. AI útskýrir málið í einföldum orðum og getur lagað það sjálfkrafa.</div>
+        </div>
+        <div class="todo-cat cat-ai">AI</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Fjöltyngis stuðningur (IS/EN/DE)</div>
+          <div class="tt-sub">Notandi velur tungumál. AI-ið svarar á völdu máli. Viðmót einnig þýtt.</div>
+        </div>
+        <div class="todo-cat cat-ux">UX</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Sniðmát safn — Algeng substation gerðir</div>
+          <div class="tt-sub">10–20 tilbúin sniðmát: "110kV dreifistöð með 5 IED", "Wind plant protection", o.s.frv. Notandi hefur þegar eitthvað til að breyta.</div>
+        </div>
+        <div class="todo-cat cat-ai">AI/Content</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase">
+    <div class="phase-header ph-3">
+      <span class="ph-num">FASI 3</span>
+      <span class="ph-title">Enterprise, skýja og samstarf</span>
+      <span class="ph-duration">~8–12 vikur</span>
+    </div>
+    <div class="todo-list">
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Notendakerfi — innskráning og verkefni</div>
+          <div class="tt-sub">Supabase Auth. Notendur geta vistað margar substation-ar og samkeyrt verkefni.</div>
+        </div>
+        <div class="todo-cat cat-inf">Infra</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">CoMPAS bakendi samþætting</div>
+          <div class="tt-sub">Vista og sækja SCD skrár frá CoMPAS þjóni. Fyrir stórfyrirtæki og virkjanir.</div>
+        </div>
+        <div class="todo-cat cat-be">Bakendi</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">OpenSCD Plugin útgáfa</div>
+          <div class="tt-sub">Pakka AI samtalsmótið sem OpenSCD plugin. Notendur sem nota OpenSCD þegar geta bætt við AI-inu.</div>
+        </div>
+        <div class="todo-cat cat-fe">Frontend</div>
+      </div>
+      <div class="todo-item">
+        <div class="todo-check"></div>
+        <div class="todo-text">
+          <div class="tt-title">Sjálfvirk PDF skýrslugerð</div>
+          <div class="tt-sub">AI myndar tæknilega skýrslu um substation-ið: GOOSE matrix, villa samantekt, IP uppbygging. Beinn samanburður við ISO staðla.</div>
+        </div>
+        <div class="todo-cat cat-ai">AI</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 7: WHAT WE NEED -->
+  <h2><span class="h2-num">7</span> Hvað við þurfum</h2>
+
+  <div class="cards">
+    <div class="card accent-border">
+      <div class="card-icon">🔑</div>
+      <div class="card-title">Anthropic API lykill</div>
+      <div class="card-body">Claude Sonnet 4.6 eða Opus. Greiðsluplan eftir notkun. ~$5–20/mán á MVP stigi.</div>
+    </div>
+    <div class="card accent-border">
+      <div class="card-icon">🌐</div>
+      <div class="card-title">Vercel reikning</div>
+      <div class="card-body">Ókeypis á MVP. Pro ($20/mán) þegar við þurfum meiri bandbreidd og serverless aðgerðir.</div>
+    </div>
+    <div class="card green-border">
+      <div class="card-icon">📜</div>
+      <div class="card-title">IEC 61850-6 XSD skrár</div>
+      <div class="card-body">Til eru í verkefninu þegar — <code>/public/IEC61850-6-*.xsd</code>. Þarf líka NSD skrárnar.</div>
+    </div>
+    <div class="card green-border">
+      <div class="card-icon">🔬</div>
+      <div class="card-title">Prófunar SCD skrár</div>
+      <div class="card-body">Raunverulegar SCD skrár til þjálfunar og prófana. Landsnet skrárnar í verkefninu eru góður grunnur.</div>
+    </div>
+    <div class="card orange-border">
+      <div class="card-icon">👷</div>
+      <div class="card-title">TypeScript/React forritari</div>
+      <div class="card-body">Einn fullur forritari getur klárað MVP á 4–6 vikum. Þú (Teddi) gætir stýrt þróuninni.</div>
+    </div>
+    <div class="card orange-border">
+      <div class="card-icon">🧪</div>
+      <div class="card-title">IEC 61850 prófunarbúnaður</div>
+      <div class="card-body">IED stillingartæki til að staðfesta að útgefnar SCD skrár virki í raunveruleika. OMICRON eða sambærilegt.</div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 8: RISKS -->
+  <h2><span class="h2-num">8</span> Áhættur og mótvægisaðgerðir</h2>
+
+  <table class="risk-table">
+    <thead>
+      <tr>
+        <th>Áhætta</th>
+        <th>Stig</th>
+        <th>Mótvægi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>AI myndar rangan XML</strong> — Claude skilur ekki öll smáatriði IEC 61850</td>
+        <td class="risk-high">Há</td>
+        <td>Staðfesting keyrir strax; AI fær villuskilaboð og lagar. Reglutengdar XML sniðmát sem AI fyllir í (ekki frjálst XML).</td>
+      </tr>
+      <tr>
+        <td><strong>Óþekkt IED gerðir</strong> — ICD skrár frá ýmsum framleiðendum eru mismunandi</td>
+        <td class="risk-med">Miðlungs</td>
+        <td>Þáttarinn í verkefninu þolir margvíslegar gerðir þegar. Prófa með Siemens, ABB, SEL ICD skrám.</td>
+      </tr>
+      <tr>
+        <td><strong>API kostnaður</strong> — Margir notendur = hár Claude API kostnaður</td>
+        <td class="risk-med">Miðlungs</td>
+        <td>Notendur meðhöndla sinn eigin API lykil (BYOK — Bring Your Own Key) á MVP stigi. Seinna: verðlegar SaaS pakkar.</td>
+      </tr>
+      <tr>
+        <td><strong>Réttarleg staða IEC staðlanna</strong> — XSD skrárnar eru með leyfi</td>
+        <td class="risk-low">Lág</td>
+        <td>Notum einungis XSD sem context í API kalli — flutningur á þekkingunni, ekki dreifing á skránum. Skoða leyfi nánar.</td>
+      </tr>
+      <tr>
+        <td><strong>Samkeppni frá stórum aðilum</strong> — Siemens eða ABB gætu bætt AI við sín tæki</td>
+        <td class="risk-low">Lág</td>
+        <td>Við getum verið á markaðnum 2+ árum á undan. GridTech sérfræðiþekking á LNET staðlum er ókopianlegur forskot.</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- SECTION 9: NEXT STEPS -->
+  <h2><span class="h2-num">9</span> Næstu skref — Hvað gerum við núna?</h2>
+
+  <div class="vision-box">
+    <p>
+      <em>Stigi 1:</em> Ráðast í smátt proof-of-concept þar sem við sýnum að Claude API getur myndað gilt SCD XML frá einfaldri lýsingu — og núverandi staðfestingarkerfi samþykkir það. Þetta ætti að taka <strong>2–3 daga</strong>.<br/><br/>
+      <em>Stigi 2:</em> Byggjum MVP samtalsviðmótið ofan á þetta — ~4 vikur.<br/><br/>
+      <em>Stigi 3:</em> Kynnir GridTech MVP á IEC 61850 ráðstefnu eða til Landsnet/Elkem sem fyrsti viðskiptavinur.
+    </p>
+  </div>
+
+  <div class="cards">
+    <div class="card accent-border">
+      <div class="card-icon">🚀</div>
+      <div class="card-title">Proof of Concept — 3 dagar</div>
+      <div class="card-body">Claude API + IEC 61850 XSD + einfald lýsing → gilt SCD. Staðfestingarkerfi samþykkir. Sýnum þetta!</div>
+    </div>
+    <div class="card green-border">
+      <div class="card-icon">🎯</div>
+      <div class="card-title">Kynning til Landsnet</div>
+      <div class="card-body">Þú ert þegar með tengsl. MVP þar sem notandi lýsir Íslenskri substation og fær SCD út — kraftmikil kynning.</div>
+    </div>
+    <div class="card orange-border">
+      <div class="card-icon">📰</div>
+      <div class="card-title">Opinn grein / LinkedIn</div>
+      <div class="card-body">"Við bjuggum til fyrsta AI-knúna SCD Creator" — Þetta er fréttavert. Setjum GridTech á kortið.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-left">GridTech Consulting Services · Theodór Jónsson · 2026</div>
+  <div class="footer-right">AI SCD Creator · <span>Verkefnaáætlun v1.0</span></div>
+</div>
+
+</body>
+</html>
