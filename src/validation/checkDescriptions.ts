@@ -176,4 +176,28 @@ export const CHECK_DESCRIPTIONS: Record<string, CheckDescription> = {
       'The configuration revision (confRev) on GOOSE and SV control blocks must be consistent. Mismatched confRev values between publisher and subscriber can cause IEDs to reject packets.',
     example: 'E.g. if a GSEControl has confRev="1" but the subscriber IED expects confRev="2".',
   },
+  IEC_013: {
+    summary: 'Report client binding',
+    detail:
+      'A client IED (an AccessPoint with client LNs such as IHMI/ITCI but no Server) should be referenced by at least one ReportControl ClientLN. An unbound client means report bindings are not engineered in the SCD. Dynamic MMS reporting is legal, so this is a warning, not an error.',
+    example: 'E.g. an OPC server IED exists in the file, all ReportControls have <RptEnabled max="5"/> but no <ClientLN> pointing to it.',
+  },
+  IEC_014: {
+    summary: 'GOOSE/SV supervision LNs (LGOS/LSVS)',
+    detail:
+      'Each IED should model one LGOS logical node per GOOSE subscription and one LSVS logical node per subscribed SV stream, so that subscription health can be supervised and alarmed on the HMI (Landsnet implementation guideline §2.2 and requirements §4.5).',
+    example: 'E.g. an IED subscribes to 4 GOOSE control blocks but its data model contains only 2 LGOS instances.',
+  },
+  IEC_015: {
+    summary: 'SV sample rate per IEC 61869-9',
+    detail:
+      'SampledValueControl smpRate must be one of the IEC 61869-9 rates: 4800 (preferred for protection and measurement), 14400 (quality metering), or 4000 (9-2LE backward compatibility). 12800 is deprecated.',
+    example: 'E.g. a control block with smpRate="9600", or the deprecated smpRate="12800".',
+  },
+  LNET_019: {
+    summary: 'MMS report naming convention (r + dataset)',
+    detail:
+      'MMS report control blocks must be named after their dataset with an "r" prefix — rEv for dataset Ev, rProt for Prot, rMeas for Meas (Landsnet implementation guideline §3.8.1).',
+    example: 'E.g. a ReportControl named "urcbA" on dataset "Ev" should be renamed "rEv".',
+  },
 };

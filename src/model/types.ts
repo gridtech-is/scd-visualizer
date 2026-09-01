@@ -34,6 +34,12 @@ export interface AccessPointModel {
   ldInsts: string[];
   ip?: string;
   mac?: string;
+  /** AccessPoint contains a <Server> element */
+  hasServer: boolean;
+  /** clock="true" on the AccessPoint (e.g. SNTP clock) */
+  clock?: boolean;
+  /** lnClass of LN elements directly under the AccessPoint (client LNs, e.g. IHMI/ITCI) */
+  clientLnClasses: string[];
 }
 
 export interface LnModel {

@@ -33,6 +33,10 @@ export const enum CheckCode {
   IEC_006 = 'IEC_006',
   IEC_007 = 'IEC_007',
   IEC_008 = 'IEC_008',
+  IEC_013 = 'IEC_013',
+  IEC_014 = 'IEC_014',
+  IEC_015 = 'IEC_015',
+  LNET_019 = 'LNET_019',
 }
 
 interface CheckInfo {
@@ -80,6 +84,10 @@ const CHECKS: CheckInfo[] = [
   { id: 24, code: CheckCode.IEC_006, title: 'DataTypeTemplates completeness' },
   { id: 25, code: CheckCode.IEC_007, title: 'GOOSE/SV dataset not empty' },
   { id: 26, code: CheckCode.IEC_008, title: 'confRev consistency' },
+  { id: 27, code: CheckCode.IEC_013, title: 'Report client binding' },
+  { id: 28, code: CheckCode.IEC_014, title: 'GOOSE/SV supervision LNs (LGOS/LSVS)' },
+  { id: 29, code: CheckCode.IEC_015, title: 'SV sample rate per IEC 61869-9' },
+  { id: 30, code: CheckCode.LNET_019, title: 'MMS report naming convention (r + dataset)' },
 ];
 
 export function runLandsnetChecks(
@@ -922,6 +930,152 @@ export function runLandsnetChecks(
   }
 
 
+  // IEC_013: report client binding — a client access point (LN under AccessPoint, no Server)
+  // should be referenced by at least one ReportControl ClientLN. Dynamic MMS reporting is
+  // legal, so this is a warning, not an error. Note: clock="true" does NOT exclude an AP —
+  // vendor tools (e.g. Hitachi) set it on OPC clients too; SNTP clocks have no client LNs.
+  {
+    const boundClients = new Set<string>();
+    for (const ctrl of model.reportControls) {
+      for (const client of ctrl.clients) {
+        if (client.iedName) {
+          boundClients.add(client.iedName);
+        }
+      }
+    }
+    for (const ied of model.ieds) {
+      const clientAps = ied.accessPoints.filter(
+        (ap) => !ap.hasServer && ap.clientLnClasses.length > 0,
+      );
+      if (clientAps.length === 0 || boundClients.has(ied.name)) {
+        continue;
+      }
+      addIssue({
+        checkId: 27,
+        codeSuffix: 'UNBOUND_CLIENT',
+        severity: 'warn',
+        message: `Client IED '${ied.name}' (${clientAps[0].clientLnClasses.join('/')}) is not referenced by any ReportControl ClientLN.`,
+        path: `/SCL/IED[@name='${ied.name}']`,
+        protocol: 'REPORT',
+        fixHint: `Bind reports to '${ied.name}' via RptEnabled/ClientLN, or confirm dynamic MMS reporting is intended.`,
+        context: { iedName: ied.name },
+        entityRef: { type: 'IED', id: `ied:${ied.name}`, iedName: ied.name },
+      });
+    }
+  }
+
+  // IEC_014: GOOSE/SV supervision — one LGOS per GOOSE subscription and one LSVS per SV
+  // stream subscription (Landsnet implementation guideline §2.2 #19, requirements §4.5).
+  {
+    const subsByIed = new Map<string, { goose: Set<string>; sv: Set<string> }>();
+    for (const { ownerIed, extRef } of model.extRefs) {
+      const st = (extRef.serviceType || '').toLowerCase();
+      const key = `${extRef.iedName || ''}:${extRef.srcCBName || ''}`;
+      if (key === ':') continue;
+      let entry = subsByIed.get(ownerIed);
+      if (!entry) {
+        entry = { goose: new Set(), sv: new Set() };
+        subsByIed.set(ownerIed, entry);
+      }
+      if (st.includes('goose')) entry.goose.add(key);
+      else if (st.includes('smv') || st.includes('sv') || st.includes('sample')) entry.sv.add(key);
+    }
+    for (const ied of model.ieds) {
+      const subs = subsByIed.get(ied.name);
+      if (!subs) continue;
+      const lnCount = (cls: string) =>
+        ied.lDevices.reduce((n, ld) => n + ld.lns.filter((ln) => ln.lnClass === cls).length, 0);
+      const lgos = lnCount('LGOS');
+      const lsvs = lnCount('LSVS');
+      if (subs.goose.size > 0 && lgos < subs.goose.size) {
+        addIssue({
+          checkId: 28,
+          codeSuffix: 'LGOS_INSUFFICIENT',
+          severity: 'warn',
+          message: `IED '${ied.name}' subscribes to ${subs.goose.size} GOOSE control block(s) but models only ${lgos} LGOS instance(s).`,
+          path: `/SCL/IED[@name='${ied.name}']`,
+          protocol: 'GOOSE',
+          fixHint: `Add one LGOS logical node per GOOSE subscription for supervision (Landsnet guideline).`,
+          context: { iedName: ied.name },
+          entityRef: { type: 'IED', id: `ied:${ied.name}`, iedName: ied.name },
+        });
+      }
+      if (subs.sv.size > 0 && lsvs < subs.sv.size) {
+        addIssue({
+          checkId: 28,
+          codeSuffix: 'LSVS_INSUFFICIENT',
+          severity: 'warn',
+          message: `IED '${ied.name}' subscribes to ${subs.sv.size} SV stream(s) but models only ${lsvs} LSVS instance(s).`,
+          path: `/SCL/IED[@name='${ied.name}']`,
+          protocol: 'SV',
+          fixHint: `Add one LSVS logical node per subscribed SV stream for supervision (Landsnet guideline).`,
+          context: { iedName: ied.name },
+          entityRef: { type: 'IED', id: `ied:${ied.name}`, iedName: ied.name },
+        });
+      }
+    }
+  }
+
+  // IEC_015: SV sample rate — smpRate must be one of the IEC 61869-9 rates; 12800 is deprecated.
+  {
+    const VALID_RATES = new Set(['4000', '4800', '12800', '14400']);
+    for (const ctrl of model.svControls) {
+      const rate = (ctrl.smpRate || '').trim();
+      const path = `/SCL/IED[@name='${ctrl.iedName}']//SampledValueControl[@name='${ctrl.name}']`;
+      const base = {
+        checkId: 29,
+        severity: 'warn' as const,
+        path,
+        protocol: 'SV' as const,
+        context: { iedName: ctrl.iedName, cbName: ctrl.name, smpRate: rate },
+        entityRef: { type: 'ControlBlock' as const, id: ctrl.key, iedName: ctrl.iedName },
+      };
+      if (!rate) {
+        addIssue({
+          ...base,
+          codeSuffix: 'SMPRATE_MISSING',
+          message: `SV control block '${ctrl.name}' in '${ctrl.iedName}' has no smpRate.`,
+          fixHint: `Set smpRate to an IEC 61869-9 rate — 4800 is the preferred rate for protection and measurement.`,
+        });
+      } else if (!VALID_RATES.has(rate)) {
+        addIssue({
+          ...base,
+          codeSuffix: 'SMPRATE_INVALID',
+          message: `SV control block '${ctrl.name}' in '${ctrl.iedName}' uses smpRate=${rate}, not an IEC 61869-9 rate (4000/4800/14400).`,
+          fixHint: `Use an IEC 61869-9 sample rate — 4800 for protection/measurement, 14400 for quality metering.`,
+        });
+      } else if (rate === '12800') {
+        addIssue({
+          ...base,
+          codeSuffix: 'SMPRATE_DEPRECATED',
+          message: `SV control block '${ctrl.name}' in '${ctrl.iedName}' uses smpRate=12800, deprecated in IEC 61869-9.`,
+          fixHint: `Prefer 4800 (protection/measurement) or 14400 (quality metering) over the deprecated 12800 rate.`,
+        });
+      }
+    }
+  }
+
+  // LNET_019: MMS report control blocks must be named after their dataset with an 'r' prefix
+  // (rEv, rProt, rMeas — Landsnet implementation guideline §3.8.1).
+  {
+    for (const ctrl of model.reportControls) {
+      if (!ctrl.datSet) continue;
+      // Allow a numeric suffix for multiple report instances on the same dataset (rEv, rEv1, rEv2…).
+      if (ctrl.name === `r${ctrl.datSet}` || new RegExp(`^r${escapeRegExp(ctrl.datSet)}\\d+$`).test(ctrl.name)) continue;
+      addIssue({
+        checkId: 30,
+        codeSuffix: 'RPT_NAME',
+        severity: 'warn',
+        message: `ReportControl '${ctrl.name}' in '${ctrl.iedName}' does not follow the r+dataset naming (expected 'r${ctrl.datSet}').`,
+        path: `/SCL/IED[@name='${ctrl.iedName}']//ReportControl[@name='${ctrl.name}']`,
+        protocol: 'REPORT',
+        fixHint: `Rename the report control block to 'r${ctrl.datSet}' to match its dataset (Landsnet naming convention).`,
+        context: { iedName: ctrl.iedName, cbName: ctrl.name, dataSet: ctrl.datSet },
+        entityRef: { type: 'ControlBlock', id: ctrl.key, iedName: ctrl.iedName },
+      });
+    }
+  }
+
   const checks: LandsnetCheckSummary[] = CHECKS.map((check) => ({
     id: check.id,
     code: checkCode(check.id),
@@ -1049,4 +1203,8 @@ function capPath(cap: CapRecord): string {
 
 function checkCode(id: number): string {
   return CHECKS.find((c) => c.id === id)?.code ?? `LNET_${String(id).padStart(3, '0')}`;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

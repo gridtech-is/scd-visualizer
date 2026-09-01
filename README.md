@@ -15,7 +15,7 @@ Also includes a standalone **Python CLI** for validation and CSV/Excel export.
 | **Dashboard** | Health gauge, bandwidth donut chart, top IED traffic bars, revision timeline |
 | **Network Graph** | Publisher → subscriber graph for GOOSE, SV, and Report signals |
 | **Addresses** | IP addresses, GOOSE, Sampled Values, and Report control block tables |
-| **Issues** | 26-check validation matrix (LNET_001–018 + IEC_001–008) + schema validation |
+| **Issues** | 30-check validation matrix (LNET_001–019 + IEC_001–015) + schema validation |
 | **Statistics** | IED traffic charts, dataset histogram, revision history |
 | **IED Explorer** | Two-pane IED tree: LDevice → LN0 → DataSets / GOOSE / SV / Reports |
 | **Single Line Diagram** | IEC 60617 substation diagram with pan/zoom and IED chips per equipment |
@@ -108,8 +108,8 @@ python3 -m pytest tests/ -v
 | Prefix | Range | Scope |
 |--------|-------|-------|
 | `SCL_XSD_001` | — | XML schema validity (IEC 61850-6 XSD, Ed2/Ed2.1 auto-detected) |
-| `LNET_` | 001–018 | Landsnet site-specific rules (VLAN, APPID, timing, naming, …) |
-| `IEC_` | 001–008 | General IEC 61850 structural checks |
+| `LNET_` | 001–019 | Landsnet site-specific rules (VLAN, APPID, timing, naming, …) |
+| `IEC_` | 001–015 | General IEC 61850 structural checks |
 
 Issues include severity (`error` / `warn`), affected IED/path, and an actionable fix hint.
 
@@ -133,7 +133,7 @@ src/
   parser/         SCD XML → SclModel
   sld/            Single Line Diagram parser + layout + symbols
   state/          React context stores (UI, validation, file loading)
-  validation/     26-check validation pipeline + schema validator
+  validation/     30-check validation pipeline + schema validator
   diff/           Compare/diff engine for two SCD files
   utils/          CSV, Excel, and JSON export helpers
   workers/        Web Worker for off-thread parsing

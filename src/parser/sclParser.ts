@@ -148,6 +148,11 @@ function parseIeds(root: Element, snippets: Record<string, string>): IedModel[] 
       return {
         name: apName,
         ldInsts,
+        hasServer: Boolean(serverEl),
+        clock: (getAttr(apEl, 'clock') || '').toLowerCase() === 'true' || undefined,
+        clientLnClasses: childrenByTag(apEl, 'LN')
+          .map((lnEl) => getAttr(lnEl, 'lnClass') || '')
+          .filter(Boolean),
       };
     });
 
