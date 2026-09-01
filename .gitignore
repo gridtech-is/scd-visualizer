@@ -8,3 +8,9 @@ vite.config.d.ts
 vitest.config.js
 vitest.config.d.ts
 .worktrees/
+
+# Local working data — real substation files and internal docs, never commit
+/SCD/
+/SCD.zip
+/*.pdf
+.claude/
