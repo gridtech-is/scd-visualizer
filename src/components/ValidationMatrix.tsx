@@ -7,6 +7,13 @@ import { CHECK_DESCRIPTIONS } from '../validation/checkDescriptions';
 
 const COLUMN_VIRTUALIZE_THRESHOLD = 40;
 
+/** Matrix row order: IEC checks first in numeric order, then Landsnet (LNET) checks. */
+export function compareCheckCodes(a: { code: string }, b: { code: string }): number {
+  const group = (code: string) => (code.startsWith('IEC_') ? 0 : code.startsWith('LNET_') ? 1 : 2);
+  const num = (code: string) => Number(code.split('_')[1]) || 0;
+  return group(a.code) - group(b.code) || num(a.code) - num(b.code);
+}
+
 interface ValidationMatrixProps {
   model: SclModel;
   landsnetReport: LandsnetValidationReport | null | undefined;
@@ -45,7 +52,7 @@ export default function ValidationMatrix({
 
   const checks = useMemo(() => {
     const lnet = landsnetReport?.checks ?? [];
-    return [schemaCheck, ...lnet];
+    return [schemaCheck, ...[...lnet].sort(compareCheckCodes)];
   }, [landsnetReport, schemaCheck]);
 
   // Map: checkCode → iedName → failCount
