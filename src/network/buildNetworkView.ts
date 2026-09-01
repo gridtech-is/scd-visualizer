@@ -410,8 +410,17 @@ function isSwitchCandidate(model: SclModel, iedName: string, desc?: string): boo
   const hasFlows = model.edges.some((edge) => edge.publisherIed === iedName || edge.subscriberIed === iedName);
   const text = `${iedName} ${desc || ''}`.toLowerCase();
   const looksLikeSwitch = /(switch|scalance|ruggedcom|ethernet switch|sw[0-9_-])/.test(text);
+  if (looksLikeSwitch) {
+    return true;
+  }
+  // Clients (IHMI/ITCI access points) and clocks (clock="true") also have no LDevices/controls,
+  // but they are endpoints — never infer them as switches. With no real switch in the file the
+  // topology falls back to one dummy subnetwork switch instead.
+  const isClientOrClock = (ied?.accessPoints || []).some(
+    (ap) => ap.clock || ap.clientLnClasses.length > 0,
+  );
   const noIedModelData = (ied?.lDevices.length || 0) === 0;
-  return looksLikeSwitch || (!hasControls && !hasFlows && noIedModelData);
+  return !hasControls && !hasFlows && noIedModelData && !isClientOrClock;
 }
 
 function countFlows(items: PortFlowItem[]): FlowCounter {
