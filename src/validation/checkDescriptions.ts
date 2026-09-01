@@ -200,4 +200,16 @@ export const CHECK_DESCRIPTIONS: Record<string, CheckDescription> = {
       'MMS report control blocks must be named after their dataset with an "r" prefix — rEv for dataset Ev, rProt for Prot, rMeas for Meas (Landsnet implementation guideline §3.8.1).',
     example: 'E.g. a ReportControl named "urcbA" on dataset "Ev" should be renamed "rEv".',
   },
+  LNET_020: {
+    summary: 'Substation section KKS naming',
+    detail:
+      'Substation-section names must follow the KKS convention already used in the IED names: the Substation name is the station code (e.g. MJO), each VoltageLevel name is the voltage-class letter only (e.g. E for 132 kV), and each Bay name is the KKS bay code (MJ1, SP1…), its full form (MJ1_2AEL10), or a bare busbar code (0AEA10). Every bay must carry the full KKS identifier in its name or desc.',
+    example: 'E.g. Substation name="AA1", VoltageLevel name="E1" or Bay name="Q01" instead of MJO / E / MJ1.',
+  },
+  IEC_016: {
+    summary: 'ConductingEquipment has LNode binding',
+    detail:
+      'Every ConductingEquipment in the Substation section (CBR, DIS, …) must contain at least one LNode reference binding it to the IED that controls or supervises it (CSWI, CILO, XCBR/XSWI…). Unbound equipment breaks traceability between the single-line diagram and the automation system.',
+    example: 'E.g. <ConductingEquipment name="GS210" type="DIS"/> with no <LNode> children.',
+  },
 };

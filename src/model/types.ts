@@ -220,6 +220,7 @@ export interface EquipmentModel {
 export interface BayModel {
   key: string;
   name: string;
+  desc?: string;
   substationName?: string;
   voltageLevelName?: string;
   iedNames: string[];

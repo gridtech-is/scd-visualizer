@@ -46,8 +46,8 @@ This is a dual-stack project: a **React/TypeScript browser app** and a **Python 
 - `src/validation/validators.ts` — orchestrates structural rule runners
 - `src/validation/rules/` — generic rules: `identityRules`, `communicationRules`, `gooseRules`, `controlBlockRules`
 - `src/validation/schemaValidator.ts` — xmllint-wasm XSD validation; auto-detects SCL edition (2007B vs 2007B4); WASM loaded with 128MB initial memory
-- `src/validation/checkDescriptions.ts` — English summaries/details/examples for all 30 checks; used by ValidationMatrix popup
-- `src/validation/landsnet/checks.ts` — **30 checks**: LNET_001–019 + IEC_001–015
+- `src/validation/checkDescriptions.ts` — English summaries/details/examples for all 32 checks; used by ValidationMatrix popup
+- `src/validation/landsnet/checks.ts` — **32 checks**: LNET_001–020 + IEC_001–016
 - `src/validation/landsnet/runLandsnetValidation.ts` — entry point; returns `LandsnetValidationReport`
 - `src/validation/landsnet/buildDictionaries.ts` — builds MMS/GOOSE/SV dictionaries from model
 
@@ -93,7 +93,7 @@ This is a dual-stack project: a **React/TypeScript browser app** and a **Python 
 - `src/App.tsx` — startup screen (no file) or `ThreePaneLayout`
 - `src/components/TopBar.tsx` — logo, file badge + file type chip + lock badge, issue count, Load File, Compare, Export, Search
 - `src/components/SubstationTree.tsx` — left pane; Substation→VoltageLevel→Bay→IED hierarchy with inline ✓/✗ badges
-- `src/components/ValidationMatrix.tsx` — 30-check × IED grid; `CheckInfoPopup` on title click
+- `src/components/ValidationMatrix.tsx` — 32-check × IED grid; `CheckInfoPopup` on title click
 - `src/components/DashboardWorkspace.tsx` — animated dashboard; uses `useCountUp()` hook for stat cards, SVG arc gauge, donut chart, stacked IED bars, revision timeline
 - `src/components/IedExplorer.tsx` — IED list + tree: IED → LDevice → LN0 (DataSets, GOOSE, SV, Reports) + other LNs
 - `src/components/AddressesTable.tsx` — 4 sub-view tabs
@@ -141,8 +141,8 @@ Each issue has `severity: 'error' | 'warn'` and `fixHint: string` (actionable in
 | Prefix | Range | Scope |
 |--------|-------|-------|
 | `SCL_XSD` | 001 | XML schema validity (xmllint-wasm) |
-| `LNET_` | 001–019 | Landsnet site-specific rules |
-| `IEC_`  | 001–015 | General IEC 61850 structural checks |
+| `LNET_` | 001–020 | Landsnet site-specific rules |
+| `IEC_`  | 001–016 | General IEC 61850 structural checks |
 
 `IEC_003` routes by `serviceType`: `"GOOSE"` → GSEControl, `"SMV"` → SampledValueControl, `"Report"` → ReportControl.
 

@@ -18,6 +18,8 @@ export interface IssueContext {
   appid?: string;
   mac?: string;
   ip?: string;
+  /** Check-specific extra context (e.g. substation/bay/equipment names) */
+  [key: string]: string | undefined;
 }
 
 export interface ValidationIssue {

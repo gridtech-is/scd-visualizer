@@ -244,6 +244,7 @@ function parseBaysFromSubstation(root: Element, snippets: Record<string, string>
         const bay: BayModel = {
           key,
           name,
+          desc: getAttr(bayEl, 'desc') || undefined,
           substationName,
           voltageLevelName,
           iedNames: Array.from(iedNames),

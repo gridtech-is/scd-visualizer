@@ -36,7 +36,9 @@ export const enum CheckCode {
   IEC_013 = 'IEC_013',
   IEC_014 = 'IEC_014',
   IEC_015 = 'IEC_015',
+  IEC_016 = 'IEC_016',
   LNET_019 = 'LNET_019',
+  LNET_020 = 'LNET_020',
 }
 
 interface CheckInfo {
@@ -88,6 +90,8 @@ const CHECKS: CheckInfo[] = [
   { id: 28, code: CheckCode.IEC_014, title: 'GOOSE/SV supervision LNs (LGOS/LSVS)' },
   { id: 29, code: CheckCode.IEC_015, title: 'SV sample rate per IEC 61869-9' },
   { id: 30, code: CheckCode.LNET_019, title: 'MMS report naming convention (r + dataset)' },
+  { id: 31, code: CheckCode.LNET_020, title: 'Substation section KKS naming' },
+  { id: 32, code: CheckCode.IEC_016, title: 'ConductingEquipment has LNode binding' },
 ];
 
 export function runLandsnetChecks(
@@ -1073,6 +1077,106 @@ export function runLandsnetChecks(
         context: { iedName: ctrl.iedName, cbName: ctrl.name, dataSet: ctrl.datSet },
         entityRef: { type: 'ControlBlock', id: ctrl.key, iedName: ctrl.iedName },
       });
+    }
+  }
+
+  // LNET_020: Substation section KKS naming — names derive from the KKS structure already
+  // present in the IED names (<station>_<voltage>_<bay>_<device>), so the check is
+  // self-consistent for any station without configuration.
+  {
+    const KKS_IED = /^([A-Z]{2,5})_([A-Z])_([A-Z0-9]{1,5})_[A-Z]{2}[0-9]{3}$/;
+    const stationCodes = new Set<string>();
+    const voltageLetters = new Set<string>();
+    for (const ied of model.ieds) {
+      const m = ied.name.match(KKS_IED);
+      if (m) {
+        stationCodes.add(m[1]);
+        voltageLetters.add(m[2]);
+      }
+    }
+    // Bay name forms: short KKS code (MJ1), full form (MJ1_2AEL10), or a bare busbar code (0AEA10).
+    const BAY_SHORT = /^[A-Z]{2}[0-9]$/;
+    const FULL_KKS = /[0-9][A-Z]{3,5}[0-9]{2}/;
+    const BAY_FULL = /^[A-Z]{2}[0-9]_[0-9][A-Z]{3,5}[0-9]{2}$/;
+    const BAY_BUSBAR = /^[0-9][A-Z]{3,5}[0-9]{2}$/;
+
+    if (stationCodes.size > 0) {
+      for (const substation of model.substations) {
+        if (!stationCodes.has(substation.name)) {
+          addIssue({
+            checkId: 31,
+            codeSuffix: 'SUBSTATION_NAME',
+            severity: 'warn',
+            message: `Substation name '${substation.name}' is not the station KKS code (expected ${[...stationCodes].join('/')}).`,
+            path: `/SCL/Substation[@name='${substation.name}']`,
+            fixHint: `Rename the Substation to the station KKS code (e.g. name="${[...stationCodes][0]}").`,
+            context: { name: substation.name },
+            entityRef: { type: 'Unknown', id: `substation:${substation.name}` },
+          });
+        }
+        for (const vl of substation.voltageLevels) {
+          if (!/^[A-Z]$/.test(vl.name) || !voltageLetters.has(vl.name)) {
+            addIssue({
+              checkId: 31,
+              codeSuffix: 'VOLTAGELEVEL_NAME',
+              severity: 'warn',
+              message: `VoltageLevel name '${vl.name}' should be the voltage-class letter only (expected ${[...voltageLetters].join('/')}).`,
+              path: `/SCL/Substation[@name='${substation.name}']/VoltageLevel[@name='${vl.name}']`,
+              fixHint: `Rename the VoltageLevel to its KKS voltage letter (e.g. name="E" for 132 kV).`,
+              context: { name: vl.name, substation: substation.name },
+              entityRef: { type: 'Unknown', id: `vl:${substation.name}:${vl.name}` },
+            });
+          }
+        }
+      }
+      for (const bay of model.bays) {
+        const nameOk = BAY_SHORT.test(bay.name) || BAY_FULL.test(bay.name) || BAY_BUSBAR.test(bay.name);
+        if (!nameOk) {
+          addIssue({
+            checkId: 31,
+            codeSuffix: 'BAY_NAME',
+            severity: 'warn',
+            message: `Bay name '${bay.name}' is not a KKS bay code (expected e.g. MJ1, MJ1_2AEL10 or a busbar code like 0AEA10).`,
+            path: `/SCL/Substation//Bay[@name='${bay.name}']`,
+            fixHint: `Rename the bay to its KKS code (short form like SP1, or full form like SP1_1AET10).`,
+            context: { name: bay.name },
+            entityRef: { type: 'Unknown', id: bay.key },
+          });
+        }
+        if (!FULL_KKS.test(bay.name) && !FULL_KKS.test(bay.desc || '')) {
+          addIssue({
+            checkId: 31,
+            codeSuffix: 'BAY_FULL_KKS',
+            severity: 'warn',
+            message: `Bay '${bay.name}' carries no full KKS identifier in name or desc (e.g. MJ1_2AEL10).`,
+            path: `/SCL/Substation//Bay[@name='${bay.name}']`,
+            fixHint: `Put the full KKS identifier in the bay name or desc (e.g. desc="MJ1_2AEL10").`,
+            context: { name: bay.name, desc: bay.desc || '' },
+            entityRef: { type: 'Unknown', id: bay.key },
+          });
+        }
+      }
+    }
+  }
+
+  // IEC_016: every ConductingEquipment in the Substation section must be bound to at least
+  // one LNode, so switchgear is traceable to the IEDs controlling/supervising it.
+  {
+    for (const bay of model.bays) {
+      for (const eq of bay.equipment) {
+        if (eq.lnodes.length === 0) {
+          addIssue({
+            checkId: 32,
+            codeSuffix: 'NO_LNODE',
+            severity: 'warn',
+            message: `ConductingEquipment '${eq.name}' (${eq.type}) in bay '${bay.name}' has no LNode binding.`,
+            path: `/SCL/Substation//Bay[@name='${bay.name}']/ConductingEquipment[@name='${eq.name}']`,
+            fixHint: `Add <LNode iedName=… lnClass="CSWI"/"CILO"…> references binding the equipment to its controlling IED.`,
+            context: { bay: bay.name, equipment: eq.name, type: eq.type },
+            entityRef: { type: 'Unknown', id: `${bay.key}:eq:${eq.name}` },
+          });
+        }
+      }
     }
   }
 
