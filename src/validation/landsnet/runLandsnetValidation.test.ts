@@ -64,7 +64,7 @@ describe('runLandsnetValidation', () => {
     const report = runLandsnetValidation(parsed.model!);
     const codes = new Set(report.issues.map((issue) => issue.code));
 
-    expect(Array.from(codes).some((code) => code.startsWith('LNET_001_'))).toBe(true);
+    expect(Array.from(codes).some((code) => code.startsWith('IEC_009_'))).toBe(true);
     expect(Array.from(codes).some((code) => code.startsWith('LNET_004_'))).toBe(true);
     expect(Array.from(codes).some((code) => code.startsWith('LNET_007_'))).toBe(true);
     expect(Array.from(codes).some((code) => code.startsWith('LNET_008_'))).toBe(true);

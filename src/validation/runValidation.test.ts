@@ -161,12 +161,12 @@ const EMPTY_EXTREF_SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
 </SCL>`;
 
 describe('validation engine', () => {
-  it('finds duplicate IED names (via LNET_001)', async () => {
+  it('finds duplicate IED names (via IEC_009)', async () => {
     const parsed = parseSclDocument(SAMPLE);
     expect(parsed.model).toBeDefined();
     const issues = await runValidation(parsed.model!);
-    // DUPLICATE_IED_NAME is now reported as LNET_001_DUPLICATE_IED
-    expect(issues.some((i) => i.code === 'LNET_001_DUPLICATE_IED')).toBe(true);
+    // DUPLICATE_IED_NAME is now reported as IEC_009_DUPLICATE_IED
+    expect(issues.some((i) => i.code === 'IEC_009_DUPLICATE_IED')).toBe(true);
   });
 
   it('finds missing dataset for GOOSE control', async () => {
@@ -196,18 +196,18 @@ describe('validation engine', () => {
     expect(issues.some((i) => i.code === 'CONNECTEDAP_MISSING_ADDRESS')).toBe(false);
   });
 
-  it('flags duplicate MAC across GOOSE/SMV streams (via LNET_009)', async () => {
+  it('flags duplicate MAC across GOOSE/SMV streams (via IEC_011)', async () => {
     const parsed = parseSclDocument(COMM_WITH_DUPLICATE_GSE_MAC);
     const issues = await runValidation(parsed.model!);
-    // DUPLICATE_GSE_SMV_MAC is now reported as LNET_009_DUP_MAC
-    expect(issues.some((i) => i.code === 'LNET_009_DUP_MAC')).toBe(true);
+    // DUPLICATE_GSE_SMV_MAC is now reported as IEC_011_DUP_MAC
+    expect(issues.some((i) => i.code === 'IEC_011_DUP_MAC')).toBe(true);
   });
 
-  it('flags duplicate ConnectedAP IP addresses (via LNET_002)', async () => {
+  it('flags duplicate ConnectedAP IP addresses (via IEC_010)', async () => {
     const parsed = parseSclDocument(COMM_WITH_DUPLICATE_IP);
     const issues = await runValidation(parsed.model!);
-    // DUPLICATE_CONNECTEDAP_IP is now reported as LNET_002_DUPLICATE_IP
-    expect(issues.some((i) => i.code === 'LNET_002_DUPLICATE_IP')).toBe(true);
+    // DUPLICATE_CONNECTEDAP_IP is now reported as IEC_010_DUPLICATE_IP
+    expect(issues.some((i) => i.code === 'IEC_010_DUPLICATE_IP')).toBe(true);
   });
 
   it('flags ConnectedAP addresses on different /24 network inside same SubNetwork', async () => {
@@ -216,11 +216,11 @@ describe('validation engine', () => {
     expect(issues.some((i) => i.code === 'SUBNETWORK_IP_NETWORK_MISMATCH')).toBe(true);
   });
 
-  it('flags duplicate APPID across GOOSE/SMV streams (via LNET_009)', async () => {
+  it('flags duplicate APPID across GOOSE/SMV streams (via IEC_011)', async () => {
     const parsed = parseSclDocument(COMM_WITH_DUPLICATE_APPID);
     const issues = await runValidation(parsed.model!);
-    // DUPLICATE_GSE_SMV_APPID is now reported as LNET_009_DUP_APPID
-    expect(issues.some((i) => i.code === 'LNET_009_DUP_APPID')).toBe(true);
+    // DUPLICATE_GSE_SMV_APPID is now reported as IEC_011_DUP_APPID
+    expect(issues.some((i) => i.code === 'IEC_011_DUP_APPID')).toBe(true);
   });
 
   it('flags empty ExtRef entries with no binding fields', async () => {
