@@ -33,6 +33,7 @@ import { useModelValidation } from './state/useModelValidation';
 import { useSclFiles } from './state/useSclFiles';
 import { useCompareState, type ChangeFilters } from './state/useCompareState';
 import { buildDiffReport } from './diff/report';
+import { buildReviewReportHtml, openReviewReportForPrint } from './utils/reviewReport';
 import StartupScreen from './components/StartupScreen';
 import DashboardWorkspace from './components/DashboardWorkspace';
 
@@ -439,6 +440,32 @@ function AppInner(): JSX.Element {
     );
   }
 
+  function exportPdfReport(): void {
+    if (!activeModel || !landsnetReport) {
+      return;
+    }
+    const schemaCount = stableIssues.filter((i) => i.code.startsWith('SCL_XSD_001')).length;
+    const checks = [
+      { id: -1, code: 'SCL_XSD', title: 'XML Schema (IEC 61850-6 SCL)', passed: schemaCount === 0, issueCount: schemaCount },
+      ...landsnetReport.checks.filter((c) => landsnetEnabled || !c.code.startsWith('LNET_')),
+    ];
+    const html = buildReviewReportHtml({
+      fileName: fileName || 'untitled.scd',
+      stationName: activeModel.substations[0]?.desc || activeModel.substations[0]?.name,
+      counts: {
+        ieds: activeModel.ieds.length,
+        goose: activeModel.gseControls.length,
+        sv: activeModel.svControls.length,
+        reports: activeModel.reportControls.length,
+      },
+      checks,
+      issues: stableIssues,
+    });
+    if (!openReviewReportForPrint(html)) {
+      showToast('Popup blocked — allow popups to export the PDF report');
+    }
+  }
+
   function exportLandsnetJson(): void {
     if (!landsnetReport) {
       return;
@@ -609,6 +636,7 @@ function AppInner(): JSX.Element {
         onExportAllFlowsCsv={exportAllFlows}
         onExportProtocolSummaryCsv={exportProtocolSummary}
         onExportLandsnetJson={exportLandsnetJson}
+        onExportPdfReport={exportPdfReport}
         onExportExcelIp={exportExcelIp}
         isCompareMode={isCompareMode}
         baselineName={baselineName}

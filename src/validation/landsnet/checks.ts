@@ -59,7 +59,7 @@ interface CapRecord {
 const CHECKS: CheckInfo[] = [
   // IEC general rules (reclassified)
   { id: 1,  code: CheckCode.IEC_009, title: 'No duplicate IED names' },
-  { id: 2,  code: CheckCode.IEC_010, title: 'No duplicate IP addresses in each subnet' },
+  { id: 2,  code: CheckCode.IEC_010, title: 'Subnet IPs unique, valid and on one network' },
   { id: 9,  code: CheckCode.IEC_011, title: 'No duplicate GOOSE MAC or APPID' },
   { id: 15, code: CheckCode.IEC_012, title: 'No duplicate SV smvID, MAC, APPID' },
   // Landsnet-specific rules
@@ -157,32 +157,77 @@ export function runLandsnetChecks(
     }
   }
 
-  // #2 duplicate IP in each subnet
+  // #2 IP addresses per subnet: unique, valid station addresses, and all on one network.
+  // Loopback/unspecified addresses are placeholders, not assignments — they are reported as
+  // invalid (per occurrence) instead of producing a misleading "duplicate 127.0.0.1" error.
   {
-    const bySubnet = new Map<string, Map<string, CapRecord[]>>();
+    const isInvalidStationIp = (ip: string): boolean => ip.startsWith('127.') || ip === '0.0.0.0';
+    const bySubnet = new Map<string, CapRecord[]>();
     for (const cap of capRecords) {
       if (!cap.ip) {
         continue;
       }
       if (!bySubnet.has(cap.subNetwork)) {
-        bySubnet.set(cap.subNetwork, new Map());
+        bySubnet.set(cap.subNetwork, []);
       }
-      const byIp = bySubnet.get(cap.subNetwork)!;
-      if (!byIp.has(cap.ip)) {
-        byIp.set(cap.ip, []);
-      }
-      byIp.get(cap.ip)!.push(cap);
+      bySubnet.get(cap.subNetwork)!.push(cap);
     }
 
-    for (const [subnet, ipMap] of bySubnet.entries()) {
-      for (const [ip, caps] of ipMap.entries()) {
-        if (caps.length <= 1) {
+    for (const [subnet, caps] of bySubnet.entries()) {
+      // Majority /24 network among valid addresses — the network everything should live on.
+      const networkOf = (ip: string): string | undefined => {
+        const parts = ip.split('.');
+        return parts.length === 4 ? `${parts[0]}.${parts[1]}.${parts[2]}` : undefined;
+      };
+      const netCounts = new Map<string, number>();
+      for (const cap of caps) {
+        if (isInvalidStationIp(cap.ip!)) continue;
+        const net = networkOf(cap.ip!);
+        if (net) netCounts.set(net, (netCounts.get(net) || 0) + 1);
+      }
+      const majority = [...netCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+
+      const byIp = new Map<string, CapRecord[]>();
+      for (const cap of caps) {
+        if (isInvalidStationIp(cap.ip!)) {
+          addIssue({
+            checkId: 2,
+            codeSuffix: 'INVALID_IP',
+            message: `${cap.iedName}/${cap.apName} has IP '${cap.ip}', which is not a valid station-network address — all Access Points in SubNetwork '${subnet}' must be on one network${majority ? ` (${majority[0]}.X)` : ''}.`,
+            path: capPath(cap),
+            fixHint: `Replace the placeholder address with a real address on the SubNetwork's network${majority ? ` (e.g. ${majority[0]}.X)` : ''}.`,
+            context: { iedName: cap.iedName, apName: cap.apName, ip: cap.ip },
+            entityRef: { type: 'ConnectedAP', id: `${cap.iedName}:${cap.apName}`, iedName: cap.iedName },
+          });
+          continue;
+        }
+        if (!byIp.has(cap.ip!)) {
+          byIp.set(cap.ip!, []);
+        }
+        byIp.get(cap.ip!)!.push(cap);
+
+        const net = networkOf(cap.ip!);
+        if (majority && netCounts.size > 1 && net && net !== majority[0]) {
+          addIssue({
+            checkId: 2,
+            codeSuffix: 'WRONG_NETWORK',
+            message: `${cap.iedName}/${cap.apName} has IP '${cap.ip}' outside the SubNetwork '${subnet}' network ${majority[0]}.X.`,
+            path: capPath(cap),
+            fixHint: `Move this Access Point onto the SubNetwork's network (e.g. ${majority[0]}.X).`,
+            context: { iedName: cap.iedName, apName: cap.apName, ip: cap.ip },
+            entityRef: { type: 'ConnectedAP', id: `${cap.iedName}:${cap.apName}`, iedName: cap.iedName },
+          });
+        }
+      }
+
+      for (const [ip, dupCaps] of byIp.entries()) {
+        if (dupCaps.length <= 1) {
           continue;
         }
         addIssue({
           checkId: 2,
           codeSuffix: 'DUPLICATE_IP',
-          message: `Duplicate IP '${ip}' found ${caps.length} times in SubNetwork '${subnet}'.`,
+          message: `Duplicate IP '${ip}' found ${dupCaps.length} times in SubNetwork '${subnet}'.`,
           path: `/SCL/Communication/SubNetwork[@name='${subnet}']`,
           fixHint: `Assign a unique IP address to each Access Point within SubNetwork '${subnet}'.`,
           context: { ip },
@@ -738,17 +783,25 @@ export function runLandsnetChecks(
     }
   }
 
-  // IEC_004: IED naming convention — names must match [A-Z]{2,5}_[A-Z]_[A-Z0-9]{1,5}_EW[0-9]{3}
+  // IEC_004: IED naming convention (KKS). Accepted forms:
+  //   <STATION>_<VOLTAGE>_<BAY>_<DEV><NNN>  bay device, e.g. MJO_F_TT2_EW050
+  //   <STATION>_<VOLTAGE>_<DEV><NNN>        station-level device on a voltage level, e.g. MJO_E_EW991
+  //   <STATION>_GW / _GW<N> / _HMI / _HMI<N>  gateways and HMIs per the Landsnet guideline
+  // The device code is any two letters (EW, EU, …), not just EW.
   {
-    const IED_NAME_RE = /^[A-Z]{2,5}_[A-Z]_[A-Z0-9]{1,5}_EW[0-9]{3}$/;
+    const IED_NAME_FORMS = [
+      /^[A-Z]{2,5}_[A-Z]_[A-Z0-9]{1,5}_[A-Z]{2}[0-9]{3}$/,
+      /^[A-Z]{2,5}_[A-Z]_[A-Z]{2}[0-9]{3}$/,
+      /^[A-Z]{2,5}_(GW|HMI)[0-9]?$/,
+    ];
     for (const ied of model.ieds) {
-      if (!IED_NAME_RE.test(ied.name)) {
+      if (!IED_NAME_FORMS.some((re) => re.test(ied.name))) {
         addIssue({
           checkId: 22,
           codeSuffix: 'NAMING',
-        severity: 'warn',
-        fixHint: `Rename the IED to follow the convention: [PREFIX]_[TYPE]_[ID]_EW[NNN] (e.g. NJA_D_SP1_EW811).`,
-          message: `IED '${ied.name}' does not match naming convention [A-Z]{2,5}_[A-Z]_[A-Z0-9]{1,5}_EW[0-9]{3}.`,
+          severity: 'warn',
+          fixHint: `Rename the IED to a KKS form: [STATION]_[VOLTAGE]_[BAY]_[DEV][NNN] (e.g. NJA_D_SP1_EW811), [STATION]_[VOLTAGE]_[DEV][NNN] for station-level devices, or [STATION]_GW / [STATION]_HMI.`,
+          message: `IED '${ied.name}' does not match the KKS naming convention (e.g. MJO_F_TT2_EW050, MJO_E_EW991 or MJO_GW).`,
           path: `/SCL/IED[@name='${ied.name}']`,
           context: { iedName: ied.name },
           entityRef: { type: 'IED', id: `ied:${ied.name}`, iedName: ied.name },

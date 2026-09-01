@@ -19,9 +19,9 @@ export const CHECK_DESCRIPTIONS: Record<string, CheckDescription> = {
     example: 'E.g. if two IEDs are both named NJA_D_SP1_EW811.',
   },
   IEC_010: {
-    summary: 'No duplicate IP addresses within a subnetwork',
+    summary: 'Subnet IPs unique, valid and on one network',
     detail:
-      'Each Access Point (ConnectedAP) must have a unique IP address within the same SubNetwork. Duplicate IP addresses cause communication conflicts on the network.',
+      'Within each SubNetwork every Access Point must have a unique IP address, the address must be a real station-network address (loopback 127.x.x.x and 0.0.0.0 are placeholders), and all addresses must share one network — e.g. all on 192.168.100.X, never mixed with 192.168.101.X.',
     example: 'E.g. if two IEDs both have IP address 192.168.1.10 on the same SubNetwork.',
   },
   LNET_003: {
@@ -144,8 +144,8 @@ export const CHECK_DESCRIPTIONS: Record<string, CheckDescription> = {
   IEC_004: {
     summary: 'IED naming convention',
     detail:
-      'IED names must follow the Landsnet pattern: [A-Z]{2,5}_[A-Z]_[A-Z0-9]{1,5}_EW[0-9]{3}. This ensures consistent and recognisable identification of all IEDs in the system.',
-    example: 'E.g. NJA_D_SP1_EW811 is valid, but Relay01 or NJA-IED-001 are not.',
+      'IED names must follow the KKS convention: [STATION]_[VOLTAGE]_[BAY]_[DEV][NNN] for bay devices (e.g. MJO_F_TT2_EW050), [STATION]_[VOLTAGE]_[DEV][NNN] for station-level devices such as busbar protection (e.g. MJO_E_EW991), or [STATION]_GW / [STATION]_HMI for gateways and HMIs. The device code may be any two letters (EW, EU, …).',
+    example: 'E.g. NJA_D_SP1_EW811, MJO_E_EW991 and MJO_GW are valid, but Relay01 or NJA-IED-001 are not.',
   },
   IEC_005: {
     summary: 'IED is in the substation hierarchy',

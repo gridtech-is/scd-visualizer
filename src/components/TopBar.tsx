@@ -18,6 +18,7 @@ interface TopBarProps {
   onExportAllFlowsCsv: () => void;
   onExportProtocolSummaryCsv: () => void;
   onExportLandsnetJson: () => void;
+  onExportPdfReport: () => void;
   onExportExcelIp: (sheetsOption?: import('../utils/exportExcel').ExportSheetsOption) => void;
   onSetAppMode: (mode: ViewMode) => void;
   // Compare mode
@@ -48,6 +49,7 @@ export default function TopBar({
   onExportAllFlowsCsv,
   onExportProtocolSummaryCsv,
   onExportLandsnetJson,
+  onExportPdfReport,
   onExportExcelIp,
   isCompareMode,
   baselineName,
@@ -109,6 +111,7 @@ export default function TopBar({
             padding: '4px',
           }}
         >
+          <button className="menu-item" onClick={() => handleExportItem(onExportPdfReport)}>PDF Review Report</button>
           <button className="menu-item" onClick={() => handleExportItem(onExportGooseCsv)}>GOOSE Matrix CSV</button>
           <button className="menu-item" onClick={() => handleExportItem(onExportGooseDetailedCsv)}>GOOSE Detailed CSV</button>
           <button className="menu-item" onClick={() => handleExportItem(onExportAllFlowsCsv)}>All Flows CSV</button>
