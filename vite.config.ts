@@ -4,6 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   base: '/scd-visualizer/',
+  // Respect an externally assigned port (e.g. preview launchers setting PORT)
+  server: { port: Number(process.env.PORT) || 5173 },
   plugins: [
     react(),
     VitePWA({
