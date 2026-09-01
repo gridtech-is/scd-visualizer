@@ -36,9 +36,9 @@ const FIT_VIEW_OPTIONS = { duration: 260, padding: 0.24 };
 const DEFAULT_EDGE_OPTIONS = { type: 'smoothstep' as const, markerEnd: { type: MarkerType.ArrowClosed } };
 
 /** Stroke colours per protocol (aligned with PAC World / visualization best practice) */
-const PROTOCOL_STROKE: Record<'GOOSE' | 'SV' | 'REPORT', string> = {
+export const PROTOCOL_STROKE: Record<'GOOSE' | 'SV' | 'REPORT', string> = {
   GOOSE: '#c41e1e',
-  SV: '#1f2933',
+  SV: '#fb923c', // matches --sv design token; the old near-black #1f2933 was invisible on the dark canvas
   REPORT: '#0e5ea8',
 };
 const EMPTY_NODE_TYPES = {};
@@ -472,7 +472,7 @@ export default function GraphCanvas({
               <MiniMap position="bottom-right" zoomable pannable />
               <Controls />
             </ReactFlow>
-            <div className="graph-legend" role="img" aria-label="Protocol legend: GOOSE red, SV dark, REPORT blue">
+            <div className="graph-legend" role="img" aria-label="Protocol legend: GOOSE red, SV orange, REPORT blue">
               <span className="graph-legend-item" style={{ ['--legend-color' as string]: PROTOCOL_STROKE.GOOSE }}>GOOSE</span>
               <span className="graph-legend-item" style={{ ['--legend-color' as string]: PROTOCOL_STROKE.SV }}>SV</span>
               <span className="graph-legend-item" style={{ ['--legend-color' as string]: PROTOCOL_STROKE.REPORT }}>REPORT</span>
