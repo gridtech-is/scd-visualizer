@@ -815,6 +815,13 @@ function buildEdges(input: {
     }
   }
 
+  // Guess-based SV fallback is only meaningful when the file carries no SV ExtRef info at all —
+  // otherwise an unmatched control simply has no engineered subscribers.
+  const anySvRefs = input.extRefs.some((r) => {
+    const st = (r.extRef.serviceType || '').toLowerCase();
+    return st.includes('smv') || st.includes('sv') || st.includes('sample');
+  });
+
   for (const ctrl of input.svControls) {
     const dataset = ctrl.datSet
       ? dataSetMap.get(datasetKeyFromControl(ctrl.iedName, ctrl.ldInst, ctrl.lnClass, ctrl.lnInst, ctrl.datSet))
@@ -825,12 +832,24 @@ function buildEdges(input: {
       }
 
       const st = (r.extRef.serviceType || '').toLowerCase();
-      const byService = st.includes('smv') || st.includes('sv') || st.includes('sample');
-      const byPublisher = r.extRef.iedName === ctrl.iedName;
-      const byCbName = r.extRef.srcCBName === ctrl.name;
-      const byLd = compareMaybe(r.extRef.srcLDInst || r.extRef.ldInst, ctrl.ldInst);
+      const svService = st.includes('smv') || st.includes('sv') || st.includes('sample');
+      // Respect explicit service type if present; do not use GOOSE/Report refs for SV.
+      if (st && !svService) {
+        return false;
+      }
+      // If the ExtRef explicitly names a publisher or source CB, it must match this control —
+      // a loose service-type match alone must not pair a subscriber with every SV control.
+      if (r.extRef.iedName && r.extRef.iedName !== ctrl.iedName) {
+        return false;
+      }
+      if (r.extRef.srcCBName && r.extRef.srcCBName !== ctrl.name) {
+        return false;
+      }
+      if (!compareMaybe(r.extRef.srcLDInst || r.extRef.ldInst, ctrl.ldInst)) {
+        return false;
+      }
 
-      return (byService || byPublisher || byCbName) && byLd;
+      return svService || Boolean(r.extRef.iedName) || Boolean(r.extRef.srcCBName);
     });
 
     if (refs.length > 0) {
@@ -848,7 +867,7 @@ function buildEdges(input: {
           fcdas: dataset?.fcdas || [],
         });
       }
-    } else {
+    } else if (!anySvRefs) {
       const probable = iedNames.filter((name) => name !== ctrl.iedName).slice(0, 2);
       for (const subscriber of probable) {
         edges.push({
